@@ -23,8 +23,7 @@ commandsApp.post("/action", (request: express.Request, response: express.Respons
     console.log(request.body);
 
     const fullCommandText = request.body.text.toString();
-    const commandType = fullCommandText.split(" ");
-    // const responseUrl = request.body.response_url.toString();
+    const commandType = fullCommandText.split(" ")[0];
 
     switch (commandType) {
         case "add":
