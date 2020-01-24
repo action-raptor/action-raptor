@@ -3,6 +3,11 @@ import * as express from "express";
 import * as cors from "cors";
 import {SectionBlock} from "@slack/types";
 
+import * as admin from "firebase-admin";
+admin.initializeApp();
+
+const firestore: admin.firestore.Firestore = admin.firestore();
+
 const markdownSection = (text: string): SectionBlock => {
     return ({
         type: "section",
@@ -27,7 +32,7 @@ commandsApp.post("/action", (request: express.Request, response: express.Respons
 
     switch (commandType) {
         case "add":
-            handleAdd(commandType, response);
+            handleAdd(request, response);
             break;
         case "list":
             handleList(response);
@@ -37,17 +42,25 @@ commandsApp.post("/action", (request: express.Request, response: express.Respons
     }
 });
 
-function handleAdd(commandType: string, response: express.Response) {
+function handleAdd(request: express.Request, response: express.Response) {
+    const channelId = request.body.channel_name.toString();
+
+    const actionItemDocRef = firestore.collection("channels").doc(`${channelId}`).collection("items").doc();
+    actionItemDocRef.set({
+        "hello": "firebase"
+    });
+
+
+
     const responseBody = {
         response_type: "in_channel",
         blocks: [
-            markdownSection(`Okay!!!!!! I've recorded your action item. commandType=${commandType}`),
+            markdownSection(`Okay! I've recorded your action item.`),
         ]
     };
 
     response.status(200).send({...responseBody});
 }
-
 
 function handleList(response: express.Response) {
     const responseBody = {
