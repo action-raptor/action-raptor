@@ -44,13 +44,18 @@ commandsApp.post("/action", (request: express.Request, response: express.Respons
 
 function handleAdd(request: express.Request, response: express.Response) {
     const channelId = request.body.channel_name.toString();
+    const workspaceId = request.body.team_id.toString();
 
-    const actionItemDocRef = firestore.collection("channels").doc(`${channelId}`).collection("items").doc();
-    actionItemDocRef.set({
-        "hello": "firebase"
+    const fullCommandText = request.body.text.toString();
+    const itemDescription = fullCommandText.substr(fullCommandText.indexOf(" ") + 1);
+
+    firestore.collection("workspace").doc(workspaceId).collection("channel").doc(channelId).collection("items").add({
+        "description": itemDescription
+    }).then(() => {
+        console.log("action item saved");
+    }).catch(err => {
+        console.error(`error saving action item: ${err}`);
     });
-
-
 
     const responseBody = {
         response_type: "in_channel",
