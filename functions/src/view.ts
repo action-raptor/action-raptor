@@ -1,4 +1,4 @@
-import {SectionBlock} from "@slack/types";
+import {ActionsBlock, SectionBlock} from "@slack/types";
 
 export const markdownSection = (text: string): SectionBlock => {
     return ({
@@ -26,6 +26,22 @@ export const editableActionLine = (text: string, actionId: string): SectionBlock
             }
         }
     });
+};
+
+export const listFooter = (): ActionsBlock => {
+    return {
+        type: "actions",
+        elements: [
+            {
+                type: "button",
+                action_id: "add_action_item",
+                text: {
+                    type: "plain_text",
+                    text: "add"
+                }
+            }
+        ]
+    }
 };
 
 export const helpSection = (): SectionBlock => {
