@@ -55,18 +55,15 @@ function handleList(request: express.Request, response: express.Response, firest
         .get()
         .then((snapshot) => {
             const itemBlocks = snapshot.docs.map((doc) => {
-                console.log(`doc id: ${doc.id}`)
                 return editableActionLine(`${doc.data().description}`, doc.id);
             });
 
-            const allBlocks = [
-                markdownSection("Here are all open action items:"),
-                ...itemBlocks,
-                listFooter()
-            ];
-
             const responseBody = {
-                blocks: allBlocks
+                blocks: [
+                    markdownSection("Here are all open action items:"),
+                    ...itemBlocks,
+                    listFooter()
+                ]
             };
 
             response.status(200).send({...responseBody});
