@@ -1,8 +1,9 @@
-import {addItemModal, divider, editableActionLine, listFooter, markdownSection} from "../view";
+import {addItemModal} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
 import * as rp from "request-promise";
 import * as functions from "firebase-functions";
+import {getActionItemMenu} from "../menu";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
@@ -93,13 +94,10 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
         .delete()
         .then(() => {
             console.log(`deleted action ${actionId} from ${collectionPath}`);
-            return firestore.collection(collectionPath).get();
+            return getActionItemMenu(collectionPath, firestore);
         })
-        .then((snapshot) => {
+        .then((blocks) => {
             console.log(`fetched them items`);
-            const itemBlocks = snapshot.docs.map((doc) => {
-                return editableActionLine(`${doc.data().description}`, doc.id);
-            });
 
             const options = {
                 method: 'POST',
@@ -109,12 +107,7 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
                 },
                 body: {
                     replace_original: "true",
-                    blocks: [
-                        markdownSection("Here are all open action items:"),
-                        divider(),
-                        ...itemBlocks,
-                        listFooter()
-                    ]
+                    blocks: blocks
                 },
                 json: true
             };
@@ -128,3 +121,4 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
             console.error(`error in complete flow: ${err}`);
         });
 }
+

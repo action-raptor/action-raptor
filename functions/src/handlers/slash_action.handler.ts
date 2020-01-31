@@ -1,6 +1,7 @@
-import {divider, editableActionLine, listFooter, markdownSection} from "../view";
+import {divider, markdownSection} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
+import {getActionItemMenu} from "../menu";
 
 export const slashActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
@@ -22,23 +23,11 @@ function handleMenu(request: express.Request, response: express.Response, firest
     const channelId = request.body.channel_name.toString();
     const workspaceId = request.body.team_id.toString();
 
-    firestore.collection(`workspace/${workspaceId}/channel/${channelId}/items`)
-        .get()
-        .then((snapshot) => {
-            const itemBlocks = snapshot.docs.map((doc) => {
-                return editableActionLine(`${doc.data().description}`, doc.id);
+    getActionItemMenu(`workspace/${workspaceId}/channel/${channelId}/items`, firestore)
+        .then((blocks) => {
+            return response.status(200).send({
+                blocks: blocks
             });
-
-            const responseBody = {
-                blocks: [
-                    markdownSection("Here are all open action items:"),
-                    divider(),
-                    ...itemBlocks,
-                    listFooter()
-                ]
-            };
-
-            response.status(200).send({...responseBody});
         })
         .catch(err => {
             console.error(`error fetching items: ${err}`);
