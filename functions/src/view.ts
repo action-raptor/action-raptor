@@ -85,21 +85,8 @@ export const addItemModal = (callbackId: string): View => {
     }
 };
 
-export const helpSection = (): SectionBlock => {
-    return markdownSection(helpText);
-};
-
 export const divider = (): DividerBlock => {
     return {
         type: "divider"
     }
 };
-
-const helpText = `usage: /action <command> <options>
-
-Add an action item:
-    /action add <item description and owner>
-    
-List outstanding action items:
-    /action list
-`;
