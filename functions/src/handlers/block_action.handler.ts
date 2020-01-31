@@ -1,6 +1,8 @@
-import {markdownSection} from "../view";
+import {addItemModal, markdownSection} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
+import * as rp from "request-promise";
+import * as functions from "firebase-functions";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
@@ -14,7 +16,7 @@ export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
         const actionId = payload.actions[0].action_id;
 
         if (actionId === "add_action_item") {
-            handleAddClicked(request, response)
+            handleAddClicked(payload, response)
         } else if (actionId.includes("complete")) {
             const docId = actionId.split(":")[1];
             handleCompleteAction(payload, response, firestore, docId);
@@ -22,9 +24,31 @@ export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     }
 };
 
-function handleAddClicked(request: express.Request, response: express.Response) {
+function handleAddClicked(payload: any, response: express.Response) {
     console.log("handling add action item");
     response.status(200).send();
+
+    const options = {
+        method: 'POST',
+        uri: 'https://slack.com/api/views.open',
+        headers: {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${functions.config().slack.access_token}`
+        },
+        body: {
+            trigger_id: payload.trigger_id,
+            view: addItemModal()
+        },
+        json: true // Automatically parses the JSON string in the response
+    };
+
+    rp(options)
+        .then(function (res: any) {
+            console.log(`got response from slack: ${JSON.stringify(res)}`);
+        })
+        .catch(function (err: any) {
+            console.log(`request failed: ${JSON.stringify(err)}`);
+        });
 }
 
 function handleCompleteAction(payload: any, response: express.Response, firestore: admin.firestore.Firestore, actionId: string) {

@@ -1,4 +1,5 @@
-import {ActionsBlock, SectionBlock} from "@slack/types";
+import {ActionsBlock, SectionBlock, View} from "@slack/types";
+
 
 export const markdownSection = (text: string): SectionBlock => {
     return ({
@@ -38,6 +39,44 @@ export const listFooter = (): ActionsBlock => {
                 text: {
                     type: "plain_text",
                     text: "add"
+                }
+            }
+        ]
+    }
+};
+
+export const addItemModal = (): View => {
+    return {
+        "type": "modal",
+        "title": {
+            "type": "plain_text",
+            "text": "New Action Item",
+            "emoji": true
+        },
+        "submit": {
+            "type": "plain_text",
+            "text": "Add",
+            "emoji": true
+        },
+        "close": {
+            "type": "plain_text",
+            "text": "Cancel",
+            "emoji": true
+        },
+        "blocks": [
+            {
+                "type": "input",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "title",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "What needs done?"
+                    }
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "Description"
                 }
             }
         ]
