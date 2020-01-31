@@ -1,4 +1,4 @@
-import {addItemModal, markdownSection} from "../view";
+import {addItemModal, divider, editableActionLine, listFooter, markdownSection} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
 import * as rp from "request-promise";
@@ -75,29 +75,56 @@ function handleAddClicked(payload: any, response: express.Response) {
     };
 
     rp(options)
-        .then(function (res: any) {
-            console.log(`got response from slack: ${JSON.stringify(res)}`);
+        .then((resp: any) => {
+            console.log(`got response from slack: ${JSON.stringify(resp)}`);
         })
-        .catch(function (err: any) {
+        .catch((err: any) => {
             console.log(`request failed: ${JSON.stringify(err)}`);
         });
 }
 
 function handleCompleteAction(payload: any, response: express.Response, firestore: admin.firestore.Firestore, actionId: string) {
+    console.log(`handling complete action: ${JSON.stringify(payload)}`);
+
     const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
+    response.status(200).send();
 
     firestore.collection(collectionPath).doc(actionId)
         .delete()
         .then(() => {
             console.log(`deleted action ${actionId} from ${collectionPath}`);
+            return firestore.collection(collectionPath).get();
+        })
+        .then((snapshot) => {
+            console.log(`fetched them items`);
+            const itemBlocks = snapshot.docs.map((doc) => {
+                return editableActionLine(`${doc.data().description}`, doc.id);
+            });
 
-            const responseBody = {
-                response_type: "in_channel",
-                blocks: markdownSection("deleted the item")
+            const options = {
+                method: 'POST',
+                uri: payload.response_url,
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: {
+                    replace_original: "true",
+                    blocks: [
+                        markdownSection("Here are all open action items:"),
+                        divider(),
+                        ...itemBlocks,
+                        listFooter()
+                    ]
+                },
+                json: true
             };
-            response.status(200).send({...responseBody});
+
+            return rp(options);
+        })
+        .then((resp) => {
+            console.log(`sent a thing to slack ${resp}`)
         })
         .catch(err => {
-            console.error(`error fetching items: ${err}`);
+            console.error(`error in complete flow: ${err}`);
         });
 }

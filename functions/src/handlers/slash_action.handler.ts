@@ -62,14 +62,16 @@ function handlePost(request: express.Request, response: express.Response, firest
                 return markdownSection(`${doc.data().description}`);
             });
 
-            response.status(200).send({
+            const responseBody = {
                 response_type: "in_channel",
                 blocks: [
                     markdownSection("Here are all open action items:"),
                     divider(),
                     ...itemBlocks
                 ]
-            });
+            };
+
+            response.status(200).send(responseBody);
         })
         .catch(err => {
             console.error(`error fetching items: ${err}`);
