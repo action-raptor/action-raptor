@@ -6,8 +6,6 @@ import * as functions from "firebase-functions";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
-        console.log("handling block action");
-        console.log(`payload: ${request.body.payload}`);
         const payload = JSON.parse(request.body.payload);
 
         switch (payload.type) {
@@ -26,7 +24,7 @@ export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
 
 function routeBlockActions(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
     if (payload.actions.length < 1) {
-        console.error("got a block action payload with no actions")
+        console.error("got a block action payload with no actions");
         response.status(200).send();
     }
 
@@ -41,7 +39,7 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
 }
 
 function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
-    console.log("pretending to add an action item");
+    console.log("handling add action item");
 
     const channelName = payload.view.callback_id.toString();
     const workspaceId = payload.team.id.toString();
@@ -59,7 +57,7 @@ function handleAddActionItem(payload: any, response: express.Response, firestore
 }
 
 function handleAddClicked(payload: any, response: express.Response) {
-    console.log("handling add action item");
+    console.log("handling add action item clicked");
     response.status(200).send();
 
     const options = {
