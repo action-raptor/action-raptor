@@ -7,22 +7,56 @@ import * as functions from "firebase-functions";
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
         console.log("handling block action");
+        console.log(`payload: ${request.body.payload}`);
         const payload = JSON.parse(request.body.payload);
-        if (payload.actions.length < 1) {
-            console.error("got a block action payload with no actions")
-            response.status(200).send();
-        }
 
-        const actionId = payload.actions[0].action_id;
-
-        if (actionId === "add_action_item") {
-            handleAddClicked(payload, response)
-        } else if (actionId.includes("complete")) {
-            const docId = actionId.split(":")[1];
-            handleCompleteAction(payload, response, firestore, docId);
+        switch (payload.type) {
+            case "block_actions":
+                routeBlockActions(payload, response, firestore);
+                break;
+            case "view_submission":
+                handleAddActionItem(payload, response, firestore);
+                break;
+            default:
+                console.error("received unknown payload type");
+                response.status(200).send();
         }
     }
 };
+
+function routeBlockActions(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+    if (payload.actions.length < 1) {
+        console.error("got a block action payload with no actions")
+        response.status(200).send();
+    }
+
+    const actionId = payload.actions[0].action_id;
+
+    if (actionId === "add_action_item") {
+        handleAddClicked(payload, response)
+    } else if (actionId.includes("complete")) {
+        const docId = actionId.split(":")[1];
+        handleCompleteAction(payload, response, firestore, docId);
+    }
+}
+
+function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+    console.log("pretending to add an action item");
+
+    const channelName = payload.view.callback_id.toString();
+    const workspaceId = payload.team.id.toString();
+    const itemDescription = payload.view.state.values.item_description.title.value.toString();
+
+    firestore.collection(`workspace/${workspaceId}/channel/${channelName}/items`).add({
+        "description": itemDescription
+    }).then(() => {
+        console.log("action item saved");
+    }).catch(err => {
+        console.error(`error saving action item: ${err}`);
+    });
+
+    response.status(200).send();
+}
 
 function handleAddClicked(payload: any, response: express.Response) {
     console.log("handling add action item");
@@ -37,7 +71,7 @@ function handleAddClicked(payload: any, response: express.Response) {
         },
         body: {
             trigger_id: payload.trigger_id,
-            view: addItemModal()
+            view: addItemModal(payload.channel.name)
         },
         json: true // Automatically parses the JSON string in the response
     };

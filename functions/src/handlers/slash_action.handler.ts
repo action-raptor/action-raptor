@@ -1,4 +1,4 @@
-import {editableActionLine, helpSection, listFooter, markdownSection} from "../view";
+import {divider, editableActionLine, helpSection, listFooter, markdownSection} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
 
@@ -61,6 +61,7 @@ function handleList(request: express.Request, response: express.Response, firest
             const responseBody = {
                 blocks: [
                     markdownSection("Here are all open action items:"),
+                    divider(),
                     ...itemBlocks,
                     listFooter()
                 ]

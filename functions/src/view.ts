@@ -1,4 +1,4 @@
-import {ActionsBlock, SectionBlock, View} from "@slack/types";
+import {ActionsBlock, DividerBlock, SectionBlock, View} from "@slack/types";
 
 
 export const markdownSection = (text: string): SectionBlock => {
@@ -45,38 +45,40 @@ export const listFooter = (): ActionsBlock => {
     }
 };
 
-export const addItemModal = (): View => {
+export const addItemModal = (callbackId: string): View => {
     return {
-        "type": "modal",
-        "title": {
-            "type": "plain_text",
-            "text": "New Action Item",
-            "emoji": true
+        type: "modal",
+        callback_id: callbackId,
+        title: {
+            type: "plain_text",
+            text: "New Action Item",
+            emoji: true
         },
-        "submit": {
-            "type": "plain_text",
-            "text": "Add",
-            "emoji": true
+        submit: {
+            type: "plain_text",
+            text: "Add",
+            emoji: true
         },
-        "close": {
-            "type": "plain_text",
-            "text": "Cancel",
-            "emoji": true
+        close: {
+            type: "plain_text",
+            text: "Cancel",
+            emoji: true
         },
-        "blocks": [
+        blocks: [
             {
-                "type": "input",
-                "element": {
-                    "type": "plain_text_input",
-                    "action_id": "title",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "What needs done?"
+                type: "input",
+                block_id: "item_description",
+                element: {
+                    type: "plain_text_input",
+                    action_id: "title",
+                    placeholder: {
+                        type: "plain_text",
+                        text: "What needs done?"
                     }
                 },
-                "label": {
-                    "type": "plain_text",
-                    "text": "Description"
+                label: {
+                    type: "plain_text",
+                    text: "Description"
                 }
             }
         ]
@@ -85,6 +87,12 @@ export const addItemModal = (): View => {
 
 export const helpSection = (): SectionBlock => {
     return markdownSection(helpText);
+};
+
+export const divider = (): DividerBlock => {
+    return {
+        type: "divider"
+    }
 };
 
 const helpText = `usage: /action <command> <options>
