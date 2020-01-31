@@ -4,6 +4,7 @@ import * as express from "express";
 import * as rp from "request-promise";
 import * as functions from "firebase-functions";
 import {getActionItemMenu} from "../menu";
+import {Block} from "@slack/types";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
@@ -40,16 +41,20 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
 }
 
 function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
-    console.log("handling add action item");
+    console.log(`handling add action item: ${JSON.stringify(payload)}`);
 
     const channelName = payload.view.callback_id.toString();
     const workspaceId = payload.team.id.toString();
     const itemDescription = payload.view.state.values.item_description.title.value.toString();
 
-    firestore.collection(`workspace/${workspaceId}/channel/${channelName}/items`).add({
+    const collectionPath = `workspace/${workspaceId}/channel/${channelName}/items`;
+    firestore.collection(`${collectionPath}`).add({
         "description": itemDescription
     }).then(() => {
         console.log("action item saved");
+        return getActionItemMenu(collectionPath, firestore)
+    }).then((blocks) => {
+        return updateMenu(payload.response_url, blocks)
     }).catch(err => {
         console.error(`error saving action item: ${err}`);
     });
@@ -98,21 +103,7 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
         })
         .then((blocks) => {
             console.log(`fetched them items`);
-
-            const options = {
-                method: 'POST',
-                uri: payload.response_url,
-                headers: {
-                    'Content-type': 'application/json',
-                },
-                body: {
-                    replace_original: "true",
-                    blocks: blocks
-                },
-                json: true
-            };
-
-            return rp(options);
+            return updateMenu(payload.response_url, blocks)
         })
         .then((resp) => {
             console.log(`sent a thing to slack ${resp}`)
@@ -122,3 +113,19 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
         });
 }
 
+function updateMenu(response_url: string, blocks: (Block)[]) {
+    const options = {
+        method: 'POST',
+        uri: response_url,
+        headers: {
+            'Content-type': 'application/json',
+        },
+        body: {
+            replace_original: "true",
+            blocks: blocks
+        },
+        json: true
+    };
+
+    return rp(options);
+}
