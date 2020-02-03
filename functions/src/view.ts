@@ -45,10 +45,9 @@ export const listFooter = (): ActionsBlock => {
     }
 };
 
-export const addItemModal = (callbackId: string): View => {
+export const addItemModal = (metadata: string): View => {
     return {
         type: "modal",
-        callback_id: callbackId,
         title: {
             type: "plain_text",
             text: "New Action Item",
@@ -81,7 +80,8 @@ export const addItemModal = (callbackId: string): View => {
                     text: "Description"
                 }
             }
-        ]
+        ],
+        private_metadata: metadata
     }
 };
 

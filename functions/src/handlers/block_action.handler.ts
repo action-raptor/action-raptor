@@ -40,31 +40,14 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
     }
 }
 
-function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
-    console.log(`handling add action item: ${JSON.stringify(payload)}`);
-
-    const channelName = payload.view.callback_id.toString();
-    const workspaceId = payload.team.id.toString();
-    const itemDescription = payload.view.state.values.item_description.title.value.toString();
-
-    const collectionPath = `workspace/${workspaceId}/channel/${channelName}/items`;
-    firestore.collection(`${collectionPath}`).add({
-        "description": itemDescription
-    }).then(() => {
-        console.log("action item saved");
-        return getActionItemMenu(collectionPath, firestore)
-    }).then((blocks) => {
-        return updateMenu(payload.response_url, blocks)
-    }).catch(err => {
-        console.error(`error saving action item: ${err}`);
-    });
-
-    response.status(200).send();
-}
-
 function handleAddClicked(payload: any, response: express.Response) {
-    console.log("handling add action item clicked");
+    console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
     response.status(200).send();
+
+    const metadata = JSON.stringify({
+        channel_name: payload.channel.name,
+        response_url: payload.response_url
+    });
 
     const options = {
         method: 'POST',
@@ -75,9 +58,9 @@ function handleAddClicked(payload: any, response: express.Response) {
         },
         body: {
             trigger_id: payload.trigger_id,
-            view: addItemModal(payload.channel.name)
+            view: addItemModal(metadata)
         },
-        json: true // Automatically parses the JSON string in the response
+        json: true
     };
 
     rp(options)
@@ -87,6 +70,30 @@ function handleAddClicked(payload: any, response: express.Response) {
         .catch((err: any) => {
             console.log(`request failed: ${JSON.stringify(err)}`);
         });
+}
+
+function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+    console.log(`handling add action item: ${JSON.stringify(payload)}`);
+
+    const metadata = JSON.parse(payload.view.private_metadata);
+
+    const channelName = metadata.channel_name.toString();
+    const workspaceId = payload.team.id.toString();
+    const itemDescription = payload.view.state.values.item_description.title.value.toString();
+
+    const collectionPath = `workspace/${workspaceId}/channel/${channelName}/items`;
+    firestore.collection(`${collectionPath}`).add({
+        "description": itemDescription
+    }).then(() => {
+        console.log("action item saved");
+        return getActionItemMenu(collectionPath, firestore)
+    }).then((blocks) => {
+        return updateMenu(metadata.response_url, blocks)
+    }).catch(err => {
+        console.error(`error saving action item: ${err}`);
+    });
+
+    response.status(200).send();
 }
 
 function handleCompleteAction(payload: any, response: express.Response, firestore: admin.firestore.Firestore, actionId: string) {
