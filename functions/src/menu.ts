@@ -17,3 +17,19 @@ export const getActionItemMenu = (collectionPath: string, firestore: admin.fires
             ];
         });
 };
+
+export const getActionItemsPublic = (collectionPath: string, firestore: admin.firestore.Firestore) => {
+    return firestore.collection(collectionPath)
+        .get()
+        .then((snapshot) => {
+            const itemBlocks = snapshot.docs.map((doc) => {
+                return markdownSection(`${doc.data().description}`);
+            });
+
+            return [
+                markdownSection("Here are all open action items:"),
+                divider(),
+                ...itemBlocks
+            ];
+        });
+};

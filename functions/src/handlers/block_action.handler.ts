@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import * as express from "express";
 import * as rp from "request-promise";
 import * as functions from "firebase-functions";
-import {getActionItemMenu} from "../menu";
+import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
@@ -34,10 +34,47 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
 
     if (actionId === "add_action_item") {
         handleAddClicked(payload, response)
+    } else if (actionId === "post_to_channel") {
+        handlePost(payload, response, firestore);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
         handleCompleteAction(payload, response, firestore, docId);
     }
+}
+
+function handlePost(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+    console.log(`handling post to channel`);
+
+    const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
+
+    getActionItemsPublic(collectionPath, firestore)
+        .then((blocks) => {
+            console.log(`fetched action items`);
+
+            const options = {
+                method: 'POST',
+                uri: `https://slack.com/api/chat.postMessage`,
+                headers: {
+                    'Content-type': 'application/json',
+                    Authorization: `Bearer ${functions.config().slack.bot_token}`
+                },
+                body: {
+                    channel: payload.channel.id,
+                    blocks: blocks
+                },
+                json: true
+            };
+
+            return rp(options);
+        })
+        .then((resp) => {
+            console.log(`got a response from slack: ${JSON.stringify(resp)}`);
+        })
+        .catch(err => {
+            console.log(`error: ${err}`)
+        });
+
+    response.status(200).send();
 }
 
 function handleAddClicked(payload: any, response: express.Response) {

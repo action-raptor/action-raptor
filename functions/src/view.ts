@@ -38,7 +38,15 @@ export const listFooter = (): ActionsBlock => {
                 action_id: "add_action_item",
                 text: {
                     type: "plain_text",
-                    text: "add"
+                    text: "Add"
+                }
+            },
+            {
+                type: "button",
+                action_id: "post_to_channel",
+                text: {
+                    type: "plain_text",
+                    text: "Post"
                 }
             }
         ]
