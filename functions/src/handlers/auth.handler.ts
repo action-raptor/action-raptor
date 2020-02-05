@@ -5,8 +5,7 @@ import * as admin from "firebase-admin";
 
 export const oauthRedirectHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
-        console.log(`there was an attempt... at auth: ${JSON.stringify(request.query)}`);
-        console.log(`code: ${request.query?.code}`);
+        console.log(`handling oauth redirect`);
 
         rp.post(`https://slack.com/api/oauth.v2.access`, {
             form: {
@@ -16,7 +15,6 @@ export const oauthRedirectHandler = (firestore: admin.firestore.Firestore) => {
             },
             json: true
         }).then((resp) => {
-            console.log(`got a new access token for ${resp.team.id}: ${resp.access_token}`);
             return firestore.collection(`bot_token`).doc(resp.team.id).set({
                 value: resp.access_token
             });
