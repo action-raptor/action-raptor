@@ -2,9 +2,9 @@ import {addItemModal} from "../view";
 import * as admin from "firebase-admin";
 import * as express from "express";
 import * as rp from "request-promise";
-import * as functions from "firebase-functions";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
+import {fetchToken, postToChannel} from "../slack_api";
 
 export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     return (request: express.Request, response: express.Response) => {
@@ -33,7 +33,7 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
     const actionId = payload.actions[0].action_id;
 
     if (actionId === "add_action_item") {
-        handleAddClicked(payload, response)
+        handleAddClicked(payload, response, firestore)
     } else if (actionId === "post_to_channel") {
         handlePost(payload, response, firestore);
     } else if (actionId.includes("complete")) {
@@ -51,28 +51,7 @@ function handlePost(payload: any, response: express.Response, firestore: admin.f
     getActionItemsPublic(collectionPath, firestore)
         .then(blocks => {
             console.log(`fetched action items`);
-
-            return firestore.collection(`bot_token`).doc(payload.team.id).get()
-                .then(tokenDoc => {
-                    console.log(`fetched bot token`);
-                    const options = {
-                        method: 'POST',
-                        uri: `https://slack.com/api/chat.postMessage`,
-                        headers: {
-                            'Content-type': 'application/json',
-                            Authorization: `Bearer ${tokenDoc.data()?.value}`
-                        },
-                        body: {
-                            channel: payload.channel.id,
-                            blocks: blocks
-                        },
-                        json: true
-                    };
-
-                    return rp(options);
-                }).catch(e => {
-                    return Promise.reject(`whoops: ${e}`);
-                });
+            return postToChannel(firestore, payload.team.id, payload.channel.name, blocks);
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
@@ -82,7 +61,8 @@ function handlePost(payload: any, response: express.Response, firestore: admin.f
         });
 }
 
-function handleAddClicked(payload: any, response: express.Response) {
+
+function handleAddClicked(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
     console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
     response.status(200).send();
 
@@ -91,21 +71,24 @@ function handleAddClicked(payload: any, response: express.Response) {
         response_url: payload.response_url
     });
 
-    const options = {
-        method: 'POST',
-        uri: 'https://slack.com/api/views.open',
-        headers: {
-            'Content-type': 'application/json',
-            'Authorization': `Bearer ${functions.config().slack.access_token}`
-        },
-        body: {
-            trigger_id: payload.trigger_id,
-            view: addItemModal(metadata)
-        },
-        json: true
-    };
+    fetchToken(firestore, payload.team.id)
+        .then((token) => {
+            const options = {
+                method: 'POST',
+                uri: 'https://slack.com/api/views.open',
+                headers: {
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: {
+                    trigger_id: payload.trigger_id,
+                    view: addItemModal(metadata)
+                },
+                json: true
+            };
 
-    rp(options)
+            return rp(options);
+        })
         .then((resp: any) => {
             console.log(`got response from slack: ${JSON.stringify(resp)}`);
         })
