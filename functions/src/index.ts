@@ -5,6 +5,7 @@ import * as cors from "cors";
 import * as admin from "firebase-admin";
 import {blockActionHandler} from "./handlers/block_action.handler";
 import {slashActionHandler} from "./handlers/slash_action.handler";
+import {oauthRedirectHandler} from "./handlers/auth.handler";
 
 admin.initializeApp();
 
@@ -15,5 +16,6 @@ commandsApp.use(cors({origin: true}));
 
 commandsApp.post("/action", slashActionHandler(firestore));
 commandsApp.post("/action/block", blockActionHandler(firestore));
+commandsApp.get("/auth/redirect", oauthRedirectHandler(firestore));
 
 export const commands = functions.https.onRequest(commandsApp);
