@@ -4,14 +4,14 @@ import * as rp from "request-promise";
 
 export const postToChannel = (firestore: admin.firestore.Firestore, workspaceId: string, channelId: string, blocks: (Block)[]) => {
     return fetchToken(firestore, workspaceId)
-        .then(tokenDoc => {
+        .then(token => {
             console.log(`fetched bot token`);
             const options = {
                 method: 'POST',
                 uri: `https://slack.com/api/chat.postMessage`,
                 headers: {
                     'Content-type': 'application/json',
-                    Authorization: `Bearer ${tokenDoc.data()?.value}`
+                    Authorization: `Bearer ${token}`
                 },
                 body: {
                     channel: channelId,
