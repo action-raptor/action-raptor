@@ -20,7 +20,7 @@ export const oauthRedirectHandler = (firestore: admin.firestore.Firestore) => {
             });
         }).then(() => {
             console.log(`saved access token`);
-            response.send("you did it!");
+            response.send("success!");
         }).catch((err) => {
             console.log(`error fetching access token: ${err}`);
             response.send("something went wrong");

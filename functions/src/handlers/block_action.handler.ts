@@ -45,27 +45,34 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
 function handlePost(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
     console.log(`handling post to channel`);
 
-    const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
+    response.status(200).send();
 
+    const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
     getActionItemsPublic(collectionPath, firestore)
-        .then((blocks) => {
+        .then(blocks => {
             console.log(`fetched action items`);
 
-            const options = {
-                method: 'POST',
-                uri: `https://slack.com/api/chat.postMessage`,
-                headers: {
-                    'Content-type': 'application/json',
-                    Authorization: `Bearer ${functions.config().slack.bot_token}`
-                },
-                body: {
-                    channel: payload.channel.id,
-                    blocks: blocks
-                },
-                json: true
-            };
+            return firestore.collection(`bot_token`).doc(payload.team.id).get()
+                .then(tokenDoc => {
+                    console.log(`fetched bot token`);
+                    const options = {
+                        method: 'POST',
+                        uri: `https://slack.com/api/chat.postMessage`,
+                        headers: {
+                            'Content-type': 'application/json',
+                            Authorization: `Bearer ${tokenDoc.data()?.value}`
+                        },
+                        body: {
+                            channel: payload.channel.id,
+                            blocks: blocks
+                        },
+                        json: true
+                    };
 
-            return rp(options);
+                    return rp(options);
+                }).catch(e => {
+                    return Promise.reject(`whoops: ${e}`);
+                });
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
@@ -73,8 +80,6 @@ function handlePost(payload: any, response: express.Response, firestore: admin.f
         .catch(err => {
             console.log(`error: ${err}`)
         });
-
-    response.status(200).send();
 }
 
 function handleAddClicked(payload: any, response: express.Response) {
