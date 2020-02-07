@@ -4,7 +4,7 @@
 
 This app is a backend built with Firebase. Though our endpoints are Functions-as-a-service and not an actual web server, we can use a set of Firebase emulators to run locally.
 
-To get the up and going, follow these steps:
+To get the app up and going, follow these steps:
 
 - install firebase-tools cli: `npm install -g firebase-tools`
 - run `firebase emulators:start --only firestore`
