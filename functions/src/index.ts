@@ -17,5 +17,8 @@ commandsApp.use(cors({origin: true}));
 commandsApp.post("/action", slashActionHandler(firestore));
 commandsApp.post("/action/block", blockActionHandler(firestore));
 commandsApp.get("/auth/redirect", oauthRedirectHandler(firestore));
+commandsApp.get("/", (request: express.Request, response: express.Response) => {
+    response.send({hello: "world"});
+});
 
 export const commands = functions.https.onRequest(commandsApp);
