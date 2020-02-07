@@ -12,4 +12,9 @@ Run not-local:
 Use in workspace:
 - create slack app
 - add slash command
+- add interactivity
+- add `chat:write` scope
 - install app to workspace
+- auth the app
+  - client id and secret
+- add bot to channel
