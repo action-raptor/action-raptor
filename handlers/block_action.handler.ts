@@ -1,21 +1,21 @@
-import {addItemModal} from "../view";
-import * as admin from "firebase-admin";
 import * as express from "express";
 import * as rp from "request-promise";
+import {fetchToken, postToChannel} from "../slack_api";
+import {Client} from "pg";
+import {addItemModal} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
-import {fetchToken, postToChannel} from "../slack_api";
 
-export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
+export const blockActionHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
         const payload = JSON.parse(request.body.payload);
 
         switch (payload.type) {
             case "block_actions":
-                routeBlockActions(payload, response, firestore);
+                routeBlockActions(payload, response, client);
                 break;
             case "view_submission":
-                handleAddActionItem(payload, response, firestore);
+                handleAddActionItem(payload, response, client);
                 break;
             default:
                 console.error("received unknown payload type");
@@ -24,7 +24,7 @@ export const blockActionHandler = (firestore: admin.firestore.Firestore) => {
     }
 };
 
-function routeBlockActions(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+function routeBlockActions(payload: any, response: express.Response, client: Client) {
     if (payload.actions.length < 1) {
         console.error("got a block action payload with no actions");
         response.status(200).send();
@@ -33,25 +33,22 @@ function routeBlockActions(payload: any, response: express.Response, firestore: 
     const actionId = payload.actions[0].action_id;
 
     if (actionId === "add_action_item") {
-        handleAddClicked(payload, response, firestore)
+        handleAddClicked(payload, response, client)
     } else if (actionId === "post_to_channel") {
-        handlePost(payload, response, firestore);
+        handlePost(payload, response, client);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
-        handleCompleteAction(payload, response, firestore, docId);
+        handleCompleteAction(payload, response, docId, client);
     }
 }
 
-function handlePost(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+function handlePost(payload: any, response: express.Response, client: Client) {
     console.log(`handling post to channel`);
-
-    response.status(200).send();
-
-    const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
-    getActionItemsPublic(collectionPath, firestore)
+    
+    getActionItemsPublic(payload.channel.name, client)
         .then(blocks => {
             console.log(`fetched action items`);
-            return postToChannel(firestore, payload.team.id, payload.channel.name, blocks);
+            return postToChannel(payload.team.id, payload.channel.name, blocks, client);
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
@@ -59,10 +56,12 @@ function handlePost(payload: any, response: express.Response, firestore: admin.f
         .catch(err => {
             console.log(`error: ${err}`)
         });
+
+    response.status(200).send();
 }
 
 
-function handleAddClicked(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+function handleAddClicked(payload: any, response: express.Response, client: Client) {
     console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
     response.status(200).send();
 
@@ -71,7 +70,7 @@ function handleAddClicked(payload: any, response: express.Response, firestore: a
         response_url: payload.response_url
     });
 
-    fetchToken(firestore, payload.team.id)
+    fetchToken(payload.team.id, client)
         .then((token) => {
             const options = {
                 method: 'POST',
@@ -97,45 +96,47 @@ function handleAddClicked(payload: any, response: express.Response, firestore: a
         });
 }
 
-function handleAddActionItem(payload: any, response: express.Response, firestore: admin.firestore.Firestore) {
+function handleAddActionItem(payload: any, response: express.Response, client: Client) {
     console.log(`handling add action item: ${JSON.stringify(payload)}`);
 
     const metadata = JSON.parse(payload.view.private_metadata);
 
     const channelName = metadata.channel_name.toString();
-    const workspaceId = payload.team.id.toString();
     const itemDescription = payload.view.state.values.item_description.title.value.toString();
 
-    const collectionPath = `workspace/${workspaceId}/channel/${channelName}/items`;
-    firestore.collection(`${collectionPath}`).add({
-        "description": itemDescription
-    }).then(() => {
-        console.log("action item saved");
-        return getActionItemMenu(collectionPath, firestore)
-    }).then((blocks) => {
-        return updateMenu(metadata.response_url, blocks)
-    }).catch(err => {
-        console.error(`error saving action item: ${err}`);
-    });
+    const queryText = "INSERT INTO action_item(description, channel_id) VALUES($1, $2)";
+    const queryValues = [itemDescription, channelName];
+
+    client.query(queryText, queryValues)
+        .then(() => {
+            console.log("action item saved");
+            return getActionItemMenu(channelName, client);
+        })
+        .then(blocks => {
+            return updateMenu(metadata.response_url, blocks);
+        })
+        .catch(err => {
+            console.error(`error saving action item: ${err}`);
+        });
 
     response.status(200).send();
 }
 
-function handleCompleteAction(payload: any, response: express.Response, firestore: admin.firestore.Firestore, actionId: string) {
+function handleCompleteAction(payload: any, response: express.Response, actionId: string, client: Client) {
     console.log(`handling complete action: ${JSON.stringify(payload)}`);
 
-    const collectionPath = `workspace/${payload.team.id}/channel/${payload.channel.name}/items`;
-    response.status(200).send();
+    const channelName = payload.channel.name;
 
-    firestore.collection(collectionPath).doc(actionId)
-        .delete()
+    const queryText = "DELETE FROM action_item WHERE id=$1";
+    const queryValues = [actionId];
+
+    client.query(queryText, queryValues)
         .then(() => {
-            console.log(`deleted action ${actionId} from ${collectionPath}`);
-            return getActionItemMenu(collectionPath, firestore);
+            console.log(`deleted action ${actionId} from ${channelName}`);
+            return getActionItemMenu(channelName, client);
         })
-        .then((blocks) => {
-            console.log(`fetched them items`);
-            return updateMenu(payload.response_url, blocks)
+        .then(blocks => {
+            return updateMenu(payload.response_url, blocks);
         })
         .then((resp) => {
             console.log(`sent a thing to slack ${resp}`)
@@ -143,6 +144,8 @@ function handleCompleteAction(payload: any, response: express.Response, firestor
         .catch(err => {
             console.error(`error in complete flow: ${err}`);
         });
+
+    response.status(200).send();
 }
 
 function updateMenu(response_url: string, blocks: (Block)[]) {
