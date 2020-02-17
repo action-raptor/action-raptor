@@ -1,9 +1,9 @@
-import * as admin from "firebase-admin";
 import {Block} from "@slack/types";
 import * as rp from "request-promise";
+import {Client} from "pg";
 
-export const postToChannel = (firestore: admin.firestore.Firestore, workspaceId: string, channelId: string, blocks: (Block)[]) => {
-    return fetchToken(firestore, workspaceId)
+export const postToChannel = (workspaceId: string, channelId: string, blocks: (Block)[], client: Client) => {
+    return fetchToken(workspaceId, client)
         .then(token => {
             console.log(`fetched bot token`);
             const options = {
@@ -24,9 +24,14 @@ export const postToChannel = (firestore: admin.firestore.Firestore, workspaceId:
         });
 };
 
-export const fetchToken = (firestore: admin.firestore.Firestore, workspaceId: string) => {
-    return firestore.collection(`bot_token`).doc(workspaceId).get()
-        .then((tokenDoc) => {
-            return tokenDoc.data()?.value
+export const fetchToken = (workspaceId: string, client: Client) => {
+    const query = {
+        text: "SELECT * FROM token WHERE workspace = $1",
+        values: [workspaceId]
+    };
+
+    return client.query(query)
+        .then(res => {
+            return res.rows[0]?.value;
         });
 };

@@ -17,7 +17,7 @@ Check that the app is working by going to that url in a browser. You should see 
 
 To be able to develop locally, we need to be able to provide a URL for the Slack backend to call when things happen, like "A user invoked the app with `/action`". To do this we'll use Ngrok to hit our local app from the internet.
 
-- download ngrok: `brew install cask ngrok`
+- download ngrok: `brew cask install ngrok`
 - start ngrok: `ngrok https 5000`
 
 Take note of the URL specified next to "Forwarding". If you go to that URL + `action-raptor-prod/us-central1/commands`, you should see the same Hello World. How neat. You should also go to the URL specified next to "Web Interface" for a cool UI that shows traffic hitting your local site. This can be really useful for inspecting payloads Slack will send.  
@@ -25,7 +25,10 @@ Take note of the URL specified next to "Forwarding". If you go to that URL + `ac
     
 ##### Setup the app in a Slack workspace:
 
-- create slack app
+
+
+- create a slack app
+  - 
 - add slash command
 - add interactivity
 - add `chat:write` scope
