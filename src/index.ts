@@ -6,14 +6,11 @@ import {blockActionHandler} from "./handlers/block_action.handler";
 import {slashActionHandler} from "./handlers/slash_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {Client} from "pg";
-import {databaseUrl} from "./config";
+import {dbOptions} from "./config";
 
 const PORT = process.env.PORT || 5000;
 
-const client = new Client({
-    connectionString: databaseUrl,
-    ssl: true,
-});
+const client = new Client(dbOptions);
 
 client.connect();
 

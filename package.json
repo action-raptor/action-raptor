@@ -8,7 +8,7 @@
     "migrate-local": "DATABASE_URL=postgres://postgres@localhost:5432/postgres node-pg-migrate",
     "postinstall": "npm run build",
     "start": "node lib/index.js",
-    "start-local": "PGPOST=5432 PGHOST=localhost PGUSER=postgres PGDATABASE=postgres ts-node src/index.ts"
+    "start-local": "ts-node src/index.ts"
   },
   "engines": {
     "node": "10"

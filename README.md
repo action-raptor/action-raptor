@@ -2,16 +2,12 @@
 
 ##### Running locally
 
-This app is a backend built with Firebase. Though our endpoints are Functions-as-a-service and not an actual web server, we can use a set of Firebase emulators to run locally.
-
 To get the app up and going, follow these steps:
 
-- install firebase-tools cli: `npm install -g firebase-tools`
-- run `firebase emulators:start --only firestore`
-- in a different console, run `FIRESTORE_EMULATOR_HOST=localhost:8080 npm run serve`
+- install yarn `npm install -g yarn`
+- run `yarn run start-local`
 
-You should see output similar to `functions[commands]: http function initialized (http://localhost:5000/action-raptor-prod/us-central1/commands)`. 
-Check that the app is working by going to that url in a browser. You should see some version of Hello World.
+ Check that the app is working by going to localhost:5000 in a browser. You should see that the service is "up".
 
 ##### Make cool internet tunnels
 
