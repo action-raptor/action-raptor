@@ -27,7 +27,7 @@ commandsApp.post("/action/block", blockActionHandler(client));
 commandsApp.get("/auth/redirect", oauthRedirectHandler(client));
 
 commandsApp.get("/", (request: express.Request, response: express.Response) => {
-    response.send({hello: "world"});
+    response.send({status: "up"});
 });
 
 commandsApp.listen(PORT, () => console.log(`listening on port ${PORT}`));
