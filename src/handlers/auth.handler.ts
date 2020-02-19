@@ -5,7 +5,9 @@ import {clientId, clientSecret} from "../config";
 
 export const oauthRedirectHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
-        console.log(`handling oauth redirect`);
+        console.log(`handling oauth redirect: ${JSON.stringify(request.query)}`);
+
+        console.log(`client id: ${clientId}`);
 
         rp.post(`https://slack.com/api/oauth.v2.access`, {
             form: {
@@ -15,6 +17,8 @@ export const oauthRedirectHandler = (client: Client) => {
             },
             json: true
         }).then((resp) => {
+            console.log(`response from slack: ${JSON.stringify(resp)}`)
+
             const query = `INSERT INTO token(value, workspace) VALUES ($1, $2)`;
             const values = [resp.access_token, resp.team.id];
             return client.query(query, values);
