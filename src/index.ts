@@ -6,10 +6,15 @@ import {blockActionHandler} from "./handlers/block_action.handler";
 import {slashActionHandler} from "./handlers/slash_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {Client} from "pg";
+import {databaseUrl} from "./config";
 
 const PORT = process.env.PORT || 5000;
 
-const client = new Client();
+const client = new Client({
+    connectionString: databaseUrl,
+    ssl: true,
+});
+
 client.connect();
 
 const commandsApp: express.Application = express();

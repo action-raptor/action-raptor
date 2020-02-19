@@ -3,11 +3,12 @@
   "scripts": {
     "build": "tsc",
     "lint": "tslint --project tsconfig.json",
+    "heroku-postbuild": "npm run migrate up",
     "migrate": "node-pg-migrate",
     "migrate-local": "DATABASE_URL=postgres://postgres@localhost:5432/postgres node-pg-migrate",
-    "serve": "npm run build && functions-framework --target=commands",
-    "start": "ts-node index.ts",
-    "start-local": "PGPOST=5432 PGHOST=localhost PGUSER=postgres PGDATABASE=postgres ts-node index.ts"
+    "postinstall": "npm run build",
+    "start": "node lib/index.js",
+    "start-local": "PGPOST=5432 PGHOST=localhost PGUSER=postgres PGDATABASE=postgres ts-node src/index.ts"
   },
   "engines": {
     "node": "10"
