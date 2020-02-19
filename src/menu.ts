@@ -37,8 +37,7 @@ export const getActionItemsPublic = (channelId: string, client: Client) => {
             return [
                 markdownSection("Here are all open action items:"),
                 divider(),
-                ...itemBlocks,
-                listFooter()
+                ...itemBlocks
             ];
         });
 };
