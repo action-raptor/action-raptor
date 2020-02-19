@@ -7,7 +7,7 @@ import {slashActionHandler} from "./handlers/slash_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {Client} from "pg";
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 const client = new Client();
 client.connect();
