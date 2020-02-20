@@ -3,10 +3,10 @@
   "scripts": {
     "build": "tsc",
     "lint": "tslint --project tsconfig.json",
-    "heroku-postbuild": "npm run migrate up",
+    "heroku-postbuild": "yarn run migrate up",
     "migrate": "node-pg-migrate",
     "migrate-local": "DATABASE_URL=postgres://postgres@localhost:5432/postgres node-pg-migrate",
-    "postinstall": "npm run build",
+    "postinstall": "yarn run build",
     "start": "node lib/index.js",
     "start-local": "ts-node src/index.ts"
   },
