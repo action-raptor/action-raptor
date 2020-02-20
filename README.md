@@ -10,7 +10,7 @@ To get the app up and going, follow these steps:
 - install yarn `npm install -g yarn`
 - install dependencies `yarn install`
 - create placeholder slack credentials
-  - create a file called `.credentials` and copy/paste the contents of `.credentials-template` into it
+  - create a file called `.credentials` in the project root directory and copy/paste the contents of `.credentials-template` into it
   - we'll fill in those values later
 - start the server `yarn run start-local`
 
