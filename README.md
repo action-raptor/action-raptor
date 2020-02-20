@@ -1,6 +1,6 @@
 ## Development Environment Setup
 
-##### Running locally
+#### Running locally
 
 To get the app up and going, follow these steps:
 
@@ -16,7 +16,7 @@ To get the app up and going, follow these steps:
 
  Check that the app is running by going to localhost:5000 in a browser. You should see that the service is "up".
 
-##### Make cool internet tunnels
+#### Make cool internet tunnels
 
 To be able to develop locally, we need to be able to provide a URL for the Slack backend to call when things happen, like "A user invoked the app with `/action`". To do this we'll use Ngrok to hit our local app from the internets.
 
@@ -28,7 +28,7 @@ Take note of the URL specified next to "Forwarding". If you go to that URL, you 
 Another tip: this url times out after 8 hours. This can be annoying. A free ngrok account will extend this expiry (but the url will still change if you restart ngrok, unless you pay dollars). 
  
     
-##### Setup the app in a Slack workspace:
+#### Setup the app in a Slack workspace:
 
 You'll need a slack workspace that you have admin privileges in. Once you have that: 
 
