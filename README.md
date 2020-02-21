@@ -12,6 +12,10 @@ To get the app up and going, follow these steps:
 - create placeholder slack credentials
   - create a file called `.credentials` in the project root directory and copy/paste the contents of `.credentials-template` into it
   - we'll fill in those values later
+- start a postgres db
+  - the app is expecting db name "postgres", username "postgres", and port 5432
+  - this comes for free if you start postgres with `brew services start postgres`
+- run migrations `yarn run migrations-local up` 
 - start the server `yarn run start-local`
 
  Check that the app is running by going to localhost:5000 in a browser. You should see that the service is "up".
