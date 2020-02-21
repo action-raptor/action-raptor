@@ -21,7 +21,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "flyway": "^0.1.9",
-    "fs": "^0.0.1-security",
+    "fp-ts": "^1.19.5",
     "node-pg-migrate": "^4.2.2",
     "pg": "^7.18.1",
     "request": "^2.88.0",

@@ -7,11 +7,15 @@ import {slashActionHandler} from "./handlers/slash_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {Client} from "pg";
 import {dbOptions} from "./config";
+import {Agent} from "https";
+import * as rp from "request-promise";
 
 const PORT = process.env.PORT || 5000;
 
-const client = new Client(dbOptions);
+const agent = new Agent({keepAlive: true});
+const rpApi = rp.defaults({agent});
 
+const client = new Client(dbOptions);
 client.connect();
 
 const commandsApp: express.Application = express();
@@ -21,7 +25,7 @@ commandsApp.use(bodyParser.urlencoded({extended: true}));
 
 commandsApp.post("/action", slashActionHandler(client));
 commandsApp.post("/action/block", blockActionHandler(client));
-commandsApp.get("/auth/redirect", oauthRedirectHandler(client));
+commandsApp.get("/auth/redirect", oauthRedirectHandler({client, rpApi}));
 
 commandsApp.get("/", (request: express.Request, response: express.Response) => {
     response.send({status: "up"});
