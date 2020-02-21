@@ -14,7 +14,7 @@ export const getActionItemMenu = (channelId: string, client: Client) => {
             });
 
             return [
-                markdownSection("Here are all open action items:"),
+                markdownSection("Open action items:"),
                 divider(),
                 ...itemBlocks,
                 listFooter()
