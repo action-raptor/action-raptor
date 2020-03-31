@@ -5,12 +5,12 @@ import {getActionItemMenu} from "../menu";
 
 export const slashActionHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
-        console.log("handling menu");
+        console.log(`handling menu ${JSON.stringify(request.body)}`);
 
-        //TODO: switch to channel id
-        const channelId = request.body.channel_name.toString();
+        const workspaceId = request.body.team_id.toString();
+        const channelId = request.body.channel_id.toString();
 
-        getActionItemMenu(channelId, client)
+        getActionItemMenu(workspaceId, channelId, client)
             .then((blocks: any) => {
                 return response.status(200).send({
                     blocks: blocks

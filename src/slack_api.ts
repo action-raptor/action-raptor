@@ -26,7 +26,7 @@ export const postToChannel = (workspaceId: string, channelId: string, blocks: (B
 
 export const fetchToken = (workspaceId: string, client: Client) => {
     const query = {
-        text: "SELECT * FROM token WHERE workspace = $1",
+        text: "SELECT * FROM slack_tokens WHERE workspace_id = $1",
         values: [workspaceId]
     };
 

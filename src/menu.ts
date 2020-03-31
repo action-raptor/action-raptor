@@ -1,10 +1,10 @@
 import {Client} from "pg";
 import {divider, editableActionLine, listFooter, markdownSection} from "./view";
 
-export const getActionItemMenu = (channelId: string, client: Client) => {
+export const getActionItemMenu = (workspaceId: string, channelId: string, client: Client) => {
     const query = {
-        text: "SELECT * FROM action_item WHERE channel_id = $1",
-        values: [channelId]
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2",
+        values: [workspaceId, channelId]
     };
 
     return client.query(query)
@@ -22,10 +22,10 @@ export const getActionItemMenu = (channelId: string, client: Client) => {
         });
 };
 
-export const getActionItemsPublic = (channelId: string, client: Client) => {
+export const getActionItemsPublic = (workspaceId: string, channelId: string, client: Client) => {
     const query = {
-        text: "SELECT * FROM action_item WHERE channel_id = $1",
-        values: [channelId]
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2",
+        values: [workspaceId, channelId]
     };
 
     return client.query(query)

@@ -48,9 +48,9 @@ const retrieveAuthTokenFromSlack = (code: string) => new ReaderTaskEither<OAuthR
         (err: any) => ({_type: "RetrieveAuthTokenFromSlackError", message: err.toString()})
     ));
 
-const upsertAuthTokenIntoPsql = (accessToken: string, teamId: string) => new ReaderTaskEither<OAuthRedirectDependencies, OAuthRedirectError, void>(({client}) => {
-    const query = `INSERT INTO token(value, workspace) VALUES ($1, $2) ON CONFLICT (workspace) DO UPDATE SET value=EXCLUDED.value`;
-    const values = [accessToken, teamId];
+const upsertAuthTokenIntoPsql = (accessToken: string, workspaceId: string) => new ReaderTaskEither<OAuthRedirectDependencies, OAuthRedirectError, void>(({client}) => {
+    const query = `INSERT INTO slack_tokens(value, workspace_id) VALUES ($1, $2) ON CONFLICT (workspace_id) DO UPDATE SET value=EXCLUDED.value`;
+    const values = [accessToken, workspaceId];
 
     return tryCatch<OAuthRedirectError, any>(
         () => client.query(query, values),

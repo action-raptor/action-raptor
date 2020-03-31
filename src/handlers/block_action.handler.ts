@@ -43,12 +43,14 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
 }
 
 function handlePost(payload: any, response: express.Response, client: Client) {
-    console.log(`handling post to channel`);
-    
-    getActionItemsPublic(payload.channel.name, client)
+    console.log(`handling post to channel ${JSON.stringify(payload)}`);
+
+    const workspaceId = payload.team.id;
+    const channelId = payload.channel.id;
+    getActionItemsPublic(workspaceId, channelId, client)
         .then(blocks => {
             console.log(`fetched action items`);
-            return postToChannel(payload.team.id, payload.channel.name, blocks, client);
+            return postToChannel(workspaceId, channelId, blocks, client);
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
@@ -66,7 +68,8 @@ function handleAddClicked(payload: any, response: express.Response, client: Clie
     response.status(200).send();
 
     const metadata = JSON.stringify({
-        channel_name: payload.channel.name,
+        workspace_id: payload.team.id,
+        channel_id: payload.channel.id,
         response_url: payload.response_url
     });
 
@@ -101,16 +104,17 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
 
     const metadata = JSON.parse(payload.view.private_metadata);
 
-    const channelName = metadata.channel_name.toString();
+    const workspaceId = metadata.workspace_id.toString();
+    const channelId = metadata.channel_id.toString();
     const itemDescription = payload.view.state.values.item_description.title.value.toString();
 
-    const queryText = "INSERT INTO action_item(description, channel_id) VALUES($1, $2)";
-    const queryValues = [itemDescription, channelName];
+    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id) VALUES($1, $2, $3)";
+    const queryValues = [itemDescription, workspaceId, channelId];
 
     client.query(queryText, queryValues)
         .then(() => {
             console.log("action item saved");
-            return getActionItemMenu(channelName, client);
+            return getActionItemMenu(workspaceId, channelId, client);
         })
         .then(blocks => {
             return updateMenu(metadata.response_url, blocks);
@@ -125,15 +129,16 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
 function handleCompleteAction(payload: any, response: express.Response, actionId: string, client: Client) {
     console.log(`handling complete action: ${JSON.stringify(payload)}`);
 
-    const channelName = payload.channel.name;
+    const workspaceId = payload.team.id;
+    const channelId = payload.channel.id;
 
-    const queryText = "DELETE FROM action_item WHERE id=$1";
+    const queryText = "DELETE FROM action_items WHERE id=$1";
     const queryValues = [actionId];
 
     client.query(queryText, queryValues)
         .then(() => {
-            console.log(`deleted action ${actionId} from ${channelName}`);
-            return getActionItemMenu(channelName, client);
+            console.log(`deleted action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
+            return getActionItemMenu(workspaceId, channelId, client);
         })
         .then(blocks => {
             return updateMenu(payload.response_url, blocks);
