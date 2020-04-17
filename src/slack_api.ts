@@ -10,7 +10,7 @@ export const postToChannel = (workspaceId: string, channelId: string, blocks: (B
                 method: 'POST',
                 uri: `https://slack.com/api/chat.postMessage`,
                 headers: {
-                    'Content-type': 'application/json',
+                    'Content-type': 'application/json; charset=utf-8',
                     Authorization: `Bearer ${token}`
                 },
                 body: {
