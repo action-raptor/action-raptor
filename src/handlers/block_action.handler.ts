@@ -79,7 +79,7 @@ function handleAddClicked(payload: any, response: express.Response, client: Clie
                 method: 'POST',
                 uri: 'https://slack.com/api/views.open',
                 headers: {
-                    'Content-type': 'application/json',
+                    'Content-type': 'application/json; charset=utf-8',
                     'Authorization': `Bearer ${token}`
                 },
                 body: {
@@ -158,7 +158,7 @@ function updateMenu(response_url: string, blocks: (Block)[]) {
         method: 'POST',
         uri: response_url,
         headers: {
-            'Content-type': 'application/json',
+            'Content-type': 'application/json; charset=utf-8',
         },
         body: {
             replace_original: "true",
