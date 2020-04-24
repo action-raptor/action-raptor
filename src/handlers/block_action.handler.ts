@@ -33,7 +33,7 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
     const actionId = payload.actions[0].action_id;
 
     if (actionId === "add_action_item") {
-        handleAddClicked(payload, response, client)
+        handleAddClicked(payload, response, client);
     } else if (actionId === "post_to_channel") {
         handlePost(payload, response, client);
     } else if (actionId.includes("complete")) {
@@ -105,14 +105,16 @@ function handleAddClicked(payload: any, response: express.Response, client: Clie
 function handleAddActionItem(payload: any, response: express.Response, client: Client) {
     console.log(`handling add action item: ${JSON.stringify(payload)}`);
 
+    const owner = payload.view.state.values.owner_select?.selected_item_owner?.selected_user;
+
     const metadata = JSON.parse(payload.view.private_metadata);
 
     const workspaceId = metadata.workspace_id.toString();
     const channelId = metadata.channel_id.toString();
     const itemDescription = payload.view.state.values.item_description.title.value.toString();
 
-    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id) VALUES($1, $2, $3)";
-    const queryValues = [itemDescription, workspaceId, channelId];
+    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id, owner) VALUES($1, $2, $3, $4)";
+    const queryValues = [itemDescription, workspaceId, channelId, owner];
 
     client.query(queryText, queryValues)
         .then(() => {
