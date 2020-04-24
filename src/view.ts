@@ -87,6 +87,22 @@ export const addItemModal = (metadata: string): View => {
                     type: "plain_text",
                     text: "Description"
                 }
+            },
+            {
+                type: "input",
+                block_id: "owner_select",
+                label: {
+                    type: "plain_text",
+                    text: "Action Item Owner"
+                },
+                element: {
+                    action_id: "selected_item_owner",
+                    type: "users_select",
+                    placeholder: {
+                        type: "plain_text",
+                        text: "Select an item"
+                    }
+                }
             }
         ],
         private_metadata: metadata

@@ -31,7 +31,7 @@ Skip this if you already have Yarn
 - start a postgres db
   - the app is expecting db name "postgres", username "postgres", and port 5432
   - this comes for free if you start postgres with `brew services start postgresql`
-- run migrations `yarn run migrations-local up` 
+- run migrations `yarn run migrate-local up` 
 - start the server `yarn run start-local`
 
 Check that the app is running by going to localhost:5000 in a browser. You should see that the service is "up".
