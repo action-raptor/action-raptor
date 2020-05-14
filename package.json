@@ -23,7 +23,7 @@
     "flyway": "^0.1.9",
     "fp-ts": "^1.19.5",
     "node-pg-migrate": "^4.8.0",
-    "pg": "^8.0.3",
+    "pg": "^8.2.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.5"
   },
