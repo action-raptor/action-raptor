@@ -33,7 +33,7 @@
     "@types/pg": "^7.14.1",
     "ts-node": "^8.6.2",
     "tslint": "^6.1.2",
-    "typescript": "^3.2.2"
+    "typescript": "^3.9.3"
   },
   "private": true
 }
