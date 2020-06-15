@@ -136,7 +136,13 @@ function handleCompleteAction(payload: any, response: express.Response, actionId
     const queryText = "DELETE FROM action_items WHERE id=$1";
     const queryValues = [actionId];
 
-    client.query(queryText, queryValues)
+    let itemDescription = "an item";
+
+    client.query('select * from action_items where id=$1', [actionId])
+        .then(res => {
+            itemDescription = res.rows[0].description;
+            return client.query(queryText, queryValues);
+        })
         .then(() => {
             console.log(`deleted action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
             return getActionItemMenu(workspaceId, channelId, client);
@@ -146,7 +152,7 @@ function handleCompleteAction(payload: any, response: express.Response, actionId
         })
         .then((resp) => {
             console.log(`update menu response: ${JSON.stringify(resp)}`);
-            return postToChannel(workspaceId, channelId, [markdownSection(`${username} completed an item`)], client);
+            return postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], client);
         })
         .catch(err => {
             console.error(`error in complete flow: ${err}`);
