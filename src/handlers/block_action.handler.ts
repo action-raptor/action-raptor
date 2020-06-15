@@ -2,7 +2,7 @@ import * as express from "express";
 import * as rp from "request-promise";
 import {fetchToken, postToChannel} from "../slack_api";
 import {Client} from "pg";
-import {addItemModal} from "../view";
+import {addItemModal, markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
 
@@ -131,6 +131,7 @@ function handleCompleteAction(payload: any, response: express.Response, actionId
 
     const workspaceId = payload.team.id;
     const channelId = payload.channel.id;
+    const username = payload.user.name;
 
     const queryText = "DELETE FROM action_items WHERE id=$1";
     const queryValues = [actionId];
@@ -144,7 +145,8 @@ function handleCompleteAction(payload: any, response: express.Response, actionId
             return updateMenu(payload.response_url, blocks);
         })
         .then((resp) => {
-            console.log(`sent a thing to slack ${resp}`)
+            console.log(`update menu response: ${JSON.stringify(resp)}`);
+            return postToChannel(workspaceId, channelId, [markdownSection(`${username} completed an item`)], client);
         })
         .catch(err => {
             console.error(`error in complete flow: ${err}`);
