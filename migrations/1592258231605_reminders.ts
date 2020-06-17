@@ -10,7 +10,7 @@ const autoUpdatingTimestamp = (pgm: MigrationBuilder) => ({
 });
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
-    pgm.createTable("reminder", {
+    pgm.createTable("reminders", {
         id: "id",
         created_at: autoUpdatingTimestamp(pgm),
         last_updated: autoUpdatingTimestamp(pgm),
@@ -21,5 +21,5 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-    pgm.dropTable("reminder");
+    pgm.dropTable("reminders");
 }

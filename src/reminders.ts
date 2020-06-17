@@ -5,7 +5,7 @@ import * as schedule from "node-schedule";
 
 
 export const setupReminders = (client: Client) => {
-    client.query("select * from reminder")
+    client.query("select * from reminders")
         .then(stuff => {
             stuff.rows.forEach(row => {
                 console.log(JSON.stringify(row));
