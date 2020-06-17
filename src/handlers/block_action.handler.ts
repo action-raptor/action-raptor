@@ -38,7 +38,10 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
         handlePost(payload, response, client);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
-        handleCompleteAction(payload, response, docId, client);
+        handleCompleteAction(payload, response, docId, client)
+            .catch(err => {
+                console.error(`error in complete flow: ${err}`);
+            });
     }
 }
 
@@ -126,39 +129,25 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
     response.status(200).send();
 }
 
-function handleCompleteAction(payload: any, response: express.Response, actionId: string, client: Client) {
+async function handleCompleteAction(payload: any, response: express.Response, actionId: string, client: Client) {
     console.log(`handling complete action: ${JSON.stringify(payload)}`);
+    response.status(200).send();
 
     const workspaceId = payload.team.id;
     const channelId = payload.channel.id;
     const username = payload.user.name;
 
-    const queryText = "DELETE FROM action_items WHERE id=$1";
-    const queryValues = [actionId];
+    const findResult = await client.query('select * from action_items where id=$1', [actionId]);
+    const itemDescription = findResult.rows[0].description;
 
-    let itemDescription = "an item";
+    await client.query("DELETE FROM action_items WHERE id=$1", [actionId]);
+    console.log(`deleted action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
 
-    client.query('select * from action_items where id=$1', [actionId])
-        .then(res => {
-            itemDescription = res.rows[0].description;
-            return client.query(queryText, queryValues);
-        })
-        .then(() => {
-            console.log(`deleted action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
-            return getActionItemMenu(workspaceId, channelId, client);
-        })
-        .then(blocks => {
-            return updateMenu(payload.response_url, blocks);
-        })
-        .then((resp) => {
-            console.log(`update menu response: ${JSON.stringify(resp)}`);
-            return postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], client);
-        })
-        .catch(err => {
-            console.error(`error in complete flow: ${err}`);
-        });
+    const blocks = await getActionItemMenu(workspaceId, channelId, client);
+    const updateResp = await updateMenu(payload.response_url, blocks);
+    console.log(`update menu response: ${JSON.stringify(updateResp)}`);
 
-    response.status(200).send();
+    return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], client);
 }
 
 function updateMenu(response_url: string, blocks: (Block)[]) {
