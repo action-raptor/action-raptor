@@ -59,7 +59,7 @@ function handlePost(payload: any, response: express.Response, client: Client) {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
         })
         .catch(err => {
-            console.log(`error: ${err}`)
+            console.log(`error: ${err}`);
         });
 
     response.status(200).send();

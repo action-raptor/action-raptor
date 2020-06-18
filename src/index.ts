@@ -11,6 +11,8 @@ import {Agent} from "https";
 import * as rp from "request-promise";
 import {eventHandler} from "./handlers/event.handler";
 
+import {setupReminders} from "./reminders";
+
 const PORT = process.env.PORT || 5000;
 
 const agent = new Agent({keepAlive: true});
@@ -34,3 +36,5 @@ commandsApp.get("/", (request: express.Request, response: express.Response) => {
 });
 
 commandsApp.listen(PORT, () => console.log(`listening on port ${PORT}`));
+
+setupReminders(client);
