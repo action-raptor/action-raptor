@@ -914,10 +914,10 @@ negotiator@0.6.2:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.2.tgz#feacf7ccf525a77ae9634436a64883ffeca346fb"
   integrity sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw==
 
-node-pg-migrate@^4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/node-pg-migrate/-/node-pg-migrate-4.8.0.tgz#3bfb39b915333b250fca3ce0e333d30143990f76"
-  integrity sha512-USxpgPbqJ6wpcMkZTsV/wqoBDlum1y19pjyQTfI2PWaOZLDAU3Duug3ZJ4ktBX96JiTqZ7Y2m8CdsK9o0rdZBQ==
+node-pg-migrate@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/node-pg-migrate/-/node-pg-migrate-5.1.1.tgz#d365c0e56ab81c9adf38af76efe4fe148b4df15e"
+  integrity sha512-upIibuA/fTg1jGO81qMy77hxzeMaoV4cgVndITl1EkLLmq0a3Lk3QZJrnBeTXOAfOlSl7SF54MY8mAZFT4D2eQ==
   dependencies:
     "@types/pg" "^7.4.0"
     decamelize "^4.0.0"
