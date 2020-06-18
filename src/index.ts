@@ -9,6 +9,7 @@ import {Client} from "pg";
 import {dbOptions} from "./config";
 import {Agent} from "https";
 import * as rp from "request-promise";
+import {eventHandler} from "./handlers/event.handler";
 
 const PORT = process.env.PORT || 5000;
 
@@ -26,6 +27,7 @@ commandsApp.use(bodyParser.urlencoded({extended: true}));
 commandsApp.post("/action", slashActionHandler(client));
 commandsApp.post("/action/block", blockActionHandler(client));
 commandsApp.get("/auth/redirect", oauthRedirectHandler({client, rpApi}));
+commandsApp.post("/event", eventHandler(client));
 
 commandsApp.get("/", (request: express.Request, response: express.Response) => {
     response.send({status: "up"});
