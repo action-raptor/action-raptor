@@ -5,9 +5,14 @@ import {homeView, markdownSection} from "../view";
 
 export const eventHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
-        response.status(200).send();
         console.log(`handling event: ${JSON.stringify(request.body)}`);
 
+        if (request.body.type === "url_verification") {
+            response.status(200).send(request.body.challenge);
+            return;
+        }
+
+        response.status(200).send();
         const event = request.body.event;
         if (event.type !== "app_home_opened") {
             return;
