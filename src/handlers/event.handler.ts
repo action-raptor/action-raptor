@@ -1,7 +1,7 @@
 import {Client} from "pg";
 import * as express from "express";
 import {publishHomeView} from "../slack_api";
-import {editableActionLine, homeView} from "../view";
+import {homeView, markdownSection} from "../view";
 
 export const eventHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
@@ -29,7 +29,7 @@ const updateHomeTab = async (userId: string, workspaceId: string, client: Client
         values: [workspaceId, userId]
     });
 
-    const blocks = res.rows.map(row => editableActionLine(row.description, row.id));
+    const blocks = res.rows.map(row => markdownSection(row.description));
 
     const homeViewBlocks = homeView(blocks);
 
