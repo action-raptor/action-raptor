@@ -9,6 +9,8 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, client
 
     return client.query(query)
         .then(res => {
+            console.log(`retrieved ${res.rows.length} items for channel menu`);
+
             const itemBlocks = res.rows.map((row) => {
                 return editableActionLine(row.description, row.id);
             });

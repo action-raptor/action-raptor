@@ -16,6 +16,9 @@ export const slashActionHandler = (client: Client) => {
                     blocks: blocks
                 });
             })
+            .then(res => {
+                console.log(`posted new menu, slack response: ${JSON.stringify(res)}`);
+            })
             .catch((err: any) => {
                 console.error(`error fetching items: ${err}`);
                 response.status(200).send({
