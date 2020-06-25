@@ -12,7 +12,10 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, client
             console.log(`retrieved ${res.rows.length} items for channel menu`);
 
             const itemBlocks = res.rows.map((row) => {
-                return editableActionLine(row.description, row.id);
+                const text = row.owner
+                    ? `${row.description} - <@${row.owner}>`
+                    : `${row.description}`;
+                return editableActionLine(text, row.id);
             });
 
             return [
@@ -33,7 +36,10 @@ export const getActionItemsPublic = (workspaceId: string, channelId: string, cli
     return client.query(query)
         .then(res => {
             const itemBlocks = res.rows.map((row) => {
-                return markdownSection(row.description);
+                const text = row.owner
+                    ? `${row.description} - <@${row.owner}>`
+                    : `${row.description}`;
+                return markdownSection(text);
             });
 
             return [
