@@ -8,8 +8,8 @@ export const setupReminders = (client: Client) => {
     client.query("select * from reminders")
         .then(stuff => {
             stuff.rows.forEach(row => {
-                console.log(JSON.stringify(row));
-                scheduleReminder(row.workspace_id, row.channel_id, row.cron, client)
+                scheduleReminder(row.workspace_id, row.channel_id, row.cron, client);
+                console.log(`set a reminder: ${JSON.stringify(row)}`);
             });
         })
         .catch(err => {
@@ -18,9 +18,11 @@ export const setupReminders = (client: Client) => {
 };
 
 const scheduleReminder = (workspaceId: string, channelId: string, cron: string, client: Client) => {
-    schedule.scheduleJob(cron, () => {
+    const job = schedule.scheduleJob(cron, () => {
         remindInChannel(workspaceId, channelId, client)
     });
+
+    console.log(`scheduled job ${job.name} to run at ${job.nextInvocation()}`)
 };
 
 const remindInChannel = (workspaceId: string, channelId: string, client: Client) => {
