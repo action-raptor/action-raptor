@@ -23,7 +23,7 @@ export const eventHandler = (client: Client) => {
 
         updateHomeTab(userId, workspaceId, client)
             .catch(err => {
-               console.log(`an error occurred handling events: ${err}`);
+                console.log(`an error occurred handling events: ${err}`);
             });
     };
 };
@@ -34,13 +34,20 @@ const updateHomeTab = async (userId: string, workspaceId: string, client: Client
         values: [workspaceId, userId]
     });
 
-    const completedCount = res.rows.filter(row => row.status === 'COMPLETED').length;
+    const completeds = res.rows.filter(row => row.status === 'COMPLETED');
+    const avgMs = completeds.length > 0 ?
+        completeds
+            .map(row => row.closed_at.getTime() - row.created_at.getTime())
+            .reduce((acc, current) => acc + current) / completeds.length
+        : 0;
+
+    const avgMins = avgMs / 1000 / 60;
 
     const itemDescriptions = res.rows
         .filter(row => row.status === 'OPEN')
         .map(row => row.description);
 
-    const homeViewBlocks = homeView(completedCount, itemDescriptions);
+    const homeViewBlocks = homeView(avgMins, completeds.length, itemDescriptions);
 
     publishHomeView(userId, workspaceId, client, homeViewBlocks);
 };
