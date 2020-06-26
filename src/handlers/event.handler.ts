@@ -30,7 +30,7 @@ export const eventHandler = (client: Client) => {
 
 const updateHomeTab = async (userId: string, workspaceId: string, client: Client) => {
     const res = await client.query({
-        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2",
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2 AND status='OPEN'",
         values: [workspaceId, userId]
     });
 

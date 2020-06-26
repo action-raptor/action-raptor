@@ -3,7 +3,7 @@ import {divider, editableActionLine, listFooter, markdownSection} from "./view";
 
 export const getActionItemMenu = (workspaceId: string, channelId: string, client: Client) => {
     const query = {
-        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2",
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
     };
 
@@ -29,7 +29,7 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, client
 
 export const getActionItemsPublic = (workspaceId: string, channelId: string, client: Client) => {
     const query = {
-        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2",
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
     };
 

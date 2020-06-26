@@ -112,9 +112,10 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
     const workspaceId = metadata.workspace_id.toString();
     const channelId = metadata.channel_id.toString();
     const itemDescription = payload.view.state.values.item_description.title.value.toString();
+    const itemStatus = 'OPEN';
 
-    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id, owner) VALUES($1, $2, $3, $4)";
-    const queryValues = [itemDescription, workspaceId, channelId, owner];
+    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id, owner, status) VALUES($1, $2, $3, $4, $5)";
+    const queryValues = [itemDescription, workspaceId, channelId, owner, itemStatus];
 
     client.query(queryText, queryValues)
         .then(() => {
