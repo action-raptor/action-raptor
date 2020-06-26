@@ -1,7 +1,7 @@
 import {Client} from "pg";
 import * as express from "express";
 import {publishHomeView} from "../slack_api";
-import {homeView, markdownSection} from "../view";
+import {homeView} from "../view";
 
 export const eventHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
@@ -30,13 +30,17 @@ export const eventHandler = (client: Client) => {
 
 const updateHomeTab = async (userId: string, workspaceId: string, client: Client) => {
     const res = await client.query({
-        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2 AND status='OPEN'",
+        text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2",
         values: [workspaceId, userId]
     });
 
-    const blocks = res.rows.map(row => markdownSection(row.description));
+    const completedCount = res.rows.filter(row => row.status === 'COMPLETED').length;
 
-    const homeViewBlocks = homeView(blocks);
+    const itemDescriptions = res.rows
+        .filter(row => row.status === 'OPEN')
+        .map(row => row.description);
+
+    const homeViewBlocks = homeView(completedCount, itemDescriptions);
 
     publishHomeView(userId, workspaceId, client, homeViewBlocks);
 };

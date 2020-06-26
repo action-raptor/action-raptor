@@ -1,4 +1,4 @@
-import {ActionsBlock, Block, DividerBlock, SectionBlock, View} from "@slack/types";
+import {ActionsBlock, DividerBlock, SectionBlock, View} from "@slack/types";
 
 
 export const markdownSection = (text: string): SectionBlock => {
@@ -115,8 +115,15 @@ export const divider = (): DividerBlock => {
     }
 };
 
-export const homeView = (blocks: (Block)[]) => {
+export const homeView = (completedCount: number, items: string[]) => {
     return [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": `You've completed ${completedCount} action items`
+            }
+        },
         {
             "type": "section",
             "text": {
@@ -124,6 +131,6 @@ export const homeView = (blocks: (Block)[]) => {
                 "text": "Here are your open action items:"
             }
         },
-        ...blocks
+        ...items.map(markdownSection)
     ]
 };
