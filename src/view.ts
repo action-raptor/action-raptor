@@ -115,7 +115,7 @@ export const divider = (): DividerBlock => {
     }
 };
 
-export const homeView = (avg: number, completedCount: number, items: string[]) => {
+export const homeView = (avg: string, completedCount: number, items: string[]) => {
     return [
         {
             "type": "section",
@@ -128,7 +128,7 @@ export const homeView = (avg: number, completedCount: number, items: string[]) =
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": `You take this many minutes on average: ${avg}`
+                "text": `On average, you take this long to complete action items: ${avg}`
             }
         },
         {
