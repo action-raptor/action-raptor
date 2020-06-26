@@ -143,8 +143,10 @@ async function handleCompleteAction(payload: any, response: express.Response, ac
     const findResult = await client.query('select * from action_items where id=$1', [actionId]);
     const itemDescription = findResult.rows[0].description;
 
-    await client.query("DELETE FROM action_items WHERE id=$1", [actionId]);
-    console.log(`deleted action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
+
+    const now = new Date();
+    await client.query("UPDATE action_items SET status='COMPLETED', closed_at=$1 WHERE id=$2", [now, actionId]);
+    console.log(`completed action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
 
     const blocks = await getActionItemMenu(workspaceId, channelId, client);
     const updateResp = await updateMenu(payload.response_url, blocks);
