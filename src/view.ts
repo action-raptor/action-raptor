@@ -115,27 +115,42 @@ export const divider = (): DividerBlock => {
     }
 };
 
+const formLink = "https://docs.google.com/forms/d/e/1FAIpQLSe1SltHxH47haVZzKe1x6eLsC89WmdEWtOTr_jo1sxg9t-jQw/viewform?usp=sf_link";
+
 export const homeView = (avg: string, completedCount: number, items: string[]) => {
     return [
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": `You've completed ${completedCount} action items`
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `Insights here are only visible to you. Let us know what you'd like to see on this page <${formLink}|here>\n\n`
             }
         },
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": `On average, you take this long to complete action items: ${avg}`
+            type: "divider"
+        },
+        {
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `\nYou've completed *${completedCount}* action items`
             }
         },
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Here are your open action items:"
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `On average, you take *${avg}* to complete action items`
+            }
+        },
+        {
+            type: "divider"
+        },
+        {
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: "\nHere are your open action items:"
             }
         },
         ...items.map(markdownSection)
