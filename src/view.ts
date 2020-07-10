@@ -1,4 +1,7 @@
 import {ActionsBlock, DividerBlock, SectionBlock, View} from "@slack/types";
+import {fromFoldableMap} from "fp-ts/lib/Record";
+import {array, getMonoid} from "fp-ts/lib/Array";
+import {record} from "fp-ts";
 
 
 export const markdownSection = (text: string): SectionBlock => {
@@ -133,23 +136,15 @@ export const homeView = (avg: string, completedCount: number, items: any[]) => {
     ]
 };
 
+const reduceToRecord = fromFoldableMap(getMonoid<string>(), array);
+
 const actionItemsList = (items: ActionItem[]) => {
-    const channelToDescriptions = {};
-    items.forEach(i => {
-        const channel = i.channel_id;
-        // @ts-ignore
-        channelToDescriptions[channel] ? channelToDescriptions[channel].push(i.description) : channelToDescriptions[channel] = [i.description]
-    });
+    const channelToDescriptions: Record<string, string[]> = reduceToRecord(items, (item: ActionItem) => [item.channel_id, [item.description]]);
 
-    const blocks = [];
-    for (const [channel_id, descriptions] of Object.entries(channelToDescriptions)) {
-        // @ts-ignore
+    return record.collect(channelToDescriptions, (channel_id, descriptions) => {
         const itemList = descriptions.map(v => `\n- ${v}`).join("");
-
-        blocks.push(markdownSection(`<#${channel_id}>${itemList}`))
-    }
-
-    return blocks;
+        return markdownSection(`<#${channel_id}>${itemList}`);
+    });
 };
 
 interface ActionItem {
