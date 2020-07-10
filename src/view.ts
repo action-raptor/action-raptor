@@ -117,42 +117,37 @@ export const divider = (): DividerBlock => {
 
 const formLink = "https://docs.google.com/forms/d/e/1FAIpQLSe1SltHxH47haVZzKe1x6eLsC89WmdEWtOTr_jo1sxg9t-jQw/viewform?usp=sf_link";
 
-export const homeView = (avg: string, completedCount: number, items: string[]) => {
+export const homeView = (avg: string, completedCount: number, items: any[]) => {
     return [
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: `Insights here are only visible to you. Let us know what you'd like to see on this page <${formLink}|here>\n\n`
-            }
-        },
-        {
-            type: "divider"
-        },
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: `\nYou've completed *${completedCount}* action items`
-            }
-        },
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: `On average, you take *${avg}* to complete action items`
-            }
-        },
-        {
-            type: "divider"
-        },
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: "\nHere are your open action items:"
-            }
-        },
-        ...items.map(markdownSection)
+        markdownSection(`Insights here are only visible to you. Let us know what you'd like to see on this page <${formLink}|here>`),
+
+        divider(),
+
+        markdownSection(`You've completed *${completedCount}* action items`),
+        markdownSection(`On average, you take *${avg}* to complete action items`),
+
+        divider(),
+
+        markdownSection("Here are your open action items:"),
+        ...actionItemsList(items)
     ]
+};
+
+const actionItemsList = (items: any[]) => {
+    const channelToDescriptions = {};
+    items.forEach(i => {
+        const channel = i.channel_id;
+        // @ts-ignore
+        channelToDescriptions[channel] ? channelToDescriptions[channel].push(i.description) : channelToDescriptions[channel] = [i.description]
+    });
+
+    const blocks = [];
+    for (const [channel_id, descriptions] of Object.entries(channelToDescriptions)) {
+        // @ts-ignore
+        const itemList = descriptions.map(v => `\n- ${v}`).join("");
+
+        blocks.push(markdownSection(`<#${channel_id}>${itemList}`))
+    }
+
+    return blocks;
 };

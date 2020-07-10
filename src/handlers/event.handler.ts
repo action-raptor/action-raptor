@@ -45,8 +45,7 @@ const updateHomeTab = async (userId: string, workspaceId: string, client: Client
     const averageTimeString = moment.duration(avgMs).humanize();
 
     const itemDescriptions = result.rows
-        .filter(row => row.status === 'OPEN')
-        .map(row => row.description);
+        .filter(row => row.status === 'OPEN');
 
     const homeViewBlocks = homeView(averageTimeString, completeds.length, itemDescriptions);
 
