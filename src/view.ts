@@ -133,7 +133,7 @@ export const homeView = (avg: string, completedCount: number, items: any[]) => {
     ]
 };
 
-const actionItemsList = (items: any[]) => {
+const actionItemsList = (items: ActionItem[]) => {
     const channelToDescriptions = {};
     items.forEach(i => {
         const channel = i.channel_id;
@@ -151,3 +151,8 @@ const actionItemsList = (items: any[]) => {
 
     return blocks;
 };
+
+interface ActionItem {
+    description: string
+    channel_id: string
+}
