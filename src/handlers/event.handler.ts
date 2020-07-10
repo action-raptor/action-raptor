@@ -44,10 +44,10 @@ const updateHomeTab = async (userId: string, workspaceId: string, client: Client
         : 0;
     const averageTimeString = moment.duration(avgMs).humanize();
 
-    const itemDescriptions = result.rows
+    const openItems = result.rows
         .filter(row => row.status === 'OPEN');
 
-    const homeViewBlocks = homeView(averageTimeString, completeds.length, itemDescriptions);
+    const homeViewBlocks = homeView(averageTimeString, completeds.length, openItems);
 
     publishHomeView(userId, workspaceId, client, homeViewBlocks);
 };
