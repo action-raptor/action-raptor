@@ -1,7 +1,8 @@
 import {Client} from "pg";
 import * as express from "express";
 import {publishHomeView} from "../slack_api";
-import {homeView, markdownSection} from "../view";
+import {homeView} from "../view";
+import * as moment from "moment";
 
 export const eventHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
@@ -23,20 +24,31 @@ export const eventHandler = (client: Client) => {
 
         updateHomeTab(userId, workspaceId, client)
             .catch(err => {
-               console.log(`an error occurred handling events: ${err}`);
+                console.log(`an error occurred handling events: ${err}`);
             });
     };
 };
 
 const updateHomeTab = async (userId: string, workspaceId: string, client: Client) => {
-    const res = await client.query({
+    const result = await client.query({
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2",
         values: [workspaceId, userId]
     });
 
-    const blocks = res.rows.map(row => markdownSection(row.description));
+    const completeds = result.rows.filter(row => row.status === 'COMPLETED');
 
-    const homeViewBlocks = homeView(blocks);
+    const avgMs = completeds.length > 0 ?
+        completeds
+            .map(row => row.closed_at.getTime() - row.created_at.getTime())
+            .reduce((acc, current) => acc + current) / completeds.length
+        : 0;
+    const averageTimeString = moment.duration(avgMs).humanize();
+
+    const itemDescriptions = result.rows
+        .filter(row => row.status === 'OPEN')
+        .map(row => row.description);
+
+    const homeViewBlocks = homeView(averageTimeString, completeds.length, itemDescriptions);
 
     publishHomeView(userId, workspaceId, client, homeViewBlocks);
 };
