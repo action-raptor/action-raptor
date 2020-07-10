@@ -120,7 +120,7 @@ export const divider = (): DividerBlock => {
 
 const formLink = "https://docs.google.com/forms/d/e/1FAIpQLSe1SltHxH47haVZzKe1x6eLsC89WmdEWtOTr_jo1sxg9t-jQw/viewform?usp=sf_link";
 
-export const homeView = (avg: string, completedCount: number, items: any[]) => {
+export const homeView = (avg: string, completedCount: number, items: ActionItem[]) => {
     return [
         markdownSection(`Insights here are only visible to you. Let us know what you'd like to see on this page <${formLink}|here>`),
 
