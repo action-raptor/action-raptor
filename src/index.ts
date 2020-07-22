@@ -12,6 +12,7 @@ import * as rp from "request-promise";
 import {eventHandler} from "./handlers/event.handler";
 
 import {setupReminders} from "./reminders";
+import {landingHandler, privacyHandler, supportHandler} from "./handlers/other.handler";
 
 const PORT = process.env.PORT || 5000;
 
@@ -31,9 +32,9 @@ commandsApp.post("/action/block", blockActionHandler(client));
 commandsApp.get("/auth/redirect", oauthRedirectHandler({client, rpApi}));
 commandsApp.post("/event", eventHandler(client));
 
-commandsApp.get("/", (request: express.Request, response: express.Response) => {
-    response.send({status: "up"});
-});
+commandsApp.get("/", landingHandler);
+commandsApp.get("/privacy-policy", privacyHandler);
+commandsApp.get("/support", supportHandler);
 
 commandsApp.listen(PORT, () => console.log(`listening on port ${PORT}`));
 
