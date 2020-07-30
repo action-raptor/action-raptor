@@ -57,3 +57,19 @@ export const fetchToken = (workspaceId: string, client: Client) => {
             return res.rows[0]?.value;
         });
 };
+
+export const deleteMessage = (responseUrl: string) => {
+    const options = {
+        method: 'POST',
+        uri: responseUrl,
+        headers: {
+            'Content-type': 'application/json; charset=utf-8',
+        },
+        body: {
+            delete_original: "true"
+        },
+        json: true
+    };
+
+    rp(options);
+};

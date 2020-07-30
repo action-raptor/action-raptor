@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as rp from "request-promise";
-import {fetchToken, postToChannel} from "../slack_api";
+import {fetchToken, deleteMessage, postToChannel} from "../slack_api";
 import {Client} from "pg";
 import {addItemModal, markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
@@ -36,6 +36,8 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
         handleAddClicked(payload, response, client);
     } else if (actionId === "post_to_channel") {
         handlePost(payload, response, client);
+    } else if (actionId === "close_menu") {
+        handleCloseClicked(payload, response);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
         handleCompleteAction(payload, response, docId, client)
@@ -50,6 +52,8 @@ function handlePost(payload: any, response: express.Response, client: Client) {
 
     const workspaceId = payload.team.id;
     const channelId = payload.channel.id;
+    const responseUrl = payload.response_url;
+
     getActionItemsPublic(workspaceId, channelId, client)
         .then(blocks => {
             console.log(`fetched action items`);
@@ -57,6 +61,7 @@ function handlePost(payload: any, response: express.Response, client: Client) {
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
+            deleteMessage(responseUrl);
         })
         .catch(err => {
             console.log(`error: ${err}`);
@@ -153,6 +158,13 @@ async function handleCompleteAction(payload: any, response: express.Response, ac
     console.log(`update menu response: ${JSON.stringify(updateResp)}`);
 
     return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], client);
+}
+
+function handleCloseClicked(payload: any, response: express.Response) {
+    console.log("handling close clicked");
+    response.status(200).send();
+
+    deleteMessage(payload.response_url);
 }
 
 function updateMenu(response_url: string, blocks: (Block)[]) {
