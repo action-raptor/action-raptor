@@ -38,6 +38,15 @@ export const listFooter = (): ActionsBlock => {
         elements: [
             {
                 type: "button",
+                action_id: "close_menu",
+                text: {
+                    type: "plain_text",
+                    text: "Close"
+                },
+                style: "danger"
+            },
+            {
+                type: "button",
                 action_id: "add_action_item",
                 text: {
                     type: "plain_text",
@@ -50,16 +59,9 @@ export const listFooter = (): ActionsBlock => {
                 text: {
                     type: "plain_text",
                     text: "Post"
-                }
+                },
+                style: "primary"
             },
-            {
-                type: "button",
-                action_id: "close_menu",
-                text: {
-                    type: "plain_text",
-                    text: "Close"
-                }
-            }
         ]
     }
 };
