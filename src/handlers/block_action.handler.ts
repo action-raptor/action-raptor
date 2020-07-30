@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as rp from "request-promise";
-import {fetchToken, postToChannel} from "../slack_api";
+import {fetchToken, handleCloseClicked, postToChannel} from "../slack_api";
 import {Client} from "pg";
 import {addItemModal, markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
@@ -36,6 +36,8 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
         handleAddClicked(payload, response, client);
     } else if (actionId === "post_to_channel") {
         handlePost(payload, response, client);
+    } else if (actionId === "close_menu") {
+        handleCloseClicked(payload);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
         handleCompleteAction(payload, response, docId, client)

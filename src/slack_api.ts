@@ -57,3 +57,21 @@ export const fetchToken = (workspaceId: string, client: Client) => {
             return res.rows[0]?.value;
         });
 };
+
+export const handleCloseClicked = (payload: any) => {
+    console.log("handling close clicked");
+
+    const options = {
+        method: 'POST',
+        uri: payload.response_url,
+        headers: {
+            'Content-type': 'application/json; charset=utf-8',
+        },
+        body: {
+            delete_original: "true"
+        },
+        json: true
+    };
+
+    rp(options);
+}

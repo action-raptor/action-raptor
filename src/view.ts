@@ -51,6 +51,14 @@ export const listFooter = (): ActionsBlock => {
                     type: "plain_text",
                     text: "Post"
                 }
+            },
+            {
+                type: "button",
+                action_id: "close_menu",
+                text: {
+                    type: "plain_text",
+                    text: "Close"
+                }
             }
         ]
     }
