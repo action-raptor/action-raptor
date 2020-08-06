@@ -1,5 +1,5 @@
 import {Client} from "pg";
-import {divider, editableActionLine, listFooter, markdownSection} from "./view";
+import {divider, editableActionLine, listFooter, markdownSection, menuHeader} from "./view";
 
 export const getActionItemMenu = (workspaceId: string, channelId: string, client: Client) => {
     const query = {
@@ -19,7 +19,7 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, client
             });
 
             return [
-                markdownSection("Open action items:"),
+                menuHeader(),
                 divider(),
                 ...itemBlocks,
                 listFooter()

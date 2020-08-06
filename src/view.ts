@@ -14,6 +14,24 @@ export const markdownSection = (text: string): SectionBlock => {
     });
 };
 
+export const menuHeader = (): SectionBlock => {
+    return ({
+        type: "section",
+        text: {
+            type: "mrkdwn",
+            text: "Open action itemzs:"
+        },
+        accessory: {
+            "type": "button",
+            "action_id": `open_settings`,
+            "text": {
+                "type": "plain_text",
+                "text": "⚙️",
+            }
+        }
+    });
+};
+
 export const editableActionLine = (text: string, actionId: string): SectionBlock => {
     return ({
         type: "section",

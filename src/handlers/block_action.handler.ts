@@ -5,6 +5,7 @@ import {Client} from "pg";
 import {addItemModal, markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
+import {nonsenseModal} from "../settings/settings.view";
 
 export const blockActionHandler = (client: Client) => {
     return (request: express.Request, response: express.Response) => {
@@ -36,6 +37,8 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
         handleAddClicked(payload, response, client);
     } else if (actionId === "post_to_channel") {
         handlePost(payload, response, client);
+    } else if (actionId === "open_settings") {
+        handleOpenSettings(payload, response, client);
     } else if (actionId === "close_menu") {
         handleCloseClicked(payload, response);
     } else if (actionId.includes("complete")) {
@@ -70,6 +73,33 @@ function handlePost(payload: any, response: express.Response, client: Client) {
     response.status(200).send();
 }
 
+function handleOpenSettings(payload: any, response: express.Response, client: Client) {
+    console.log("handling open settings");
+    response.status(200).send();
+
+    fetchToken(payload.team.id, client)
+        .then((token) => {
+            const options = {
+                method: 'POST',
+                uri: 'https://slack.com/api/views.open',
+                headers: {
+                    'Content-type': 'application/json; charset=utf-8',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: {
+                    trigger_id: payload.trigger_id,
+                    view: nonsenseModal()
+                },
+                json: true
+            };
+
+            return rp(options)
+                .then((resp) => {
+                    console.log(JSON.stringify(resp));
+                    return resp;
+                });
+        });
+}
 
 function handleAddClicked(payload: any, response: express.Response, client: Client) {
     console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
