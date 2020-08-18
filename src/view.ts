@@ -19,7 +19,7 @@ export const menuHeader = (): SectionBlock => {
         type: "section",
         text: {
             type: "mrkdwn",
-            text: "Open action itemzs:"
+            text: "Open action items:"
         },
         accessory: {
             "type": "button",

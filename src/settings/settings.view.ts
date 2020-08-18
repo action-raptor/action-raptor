@@ -1,4 +1,4 @@
-import {Option, View} from "@slack/types";
+import {View} from "@slack/types";
 
 export const nonsenseModal = (): View => {
     return {
@@ -30,16 +30,24 @@ export const nonsenseModal = (): View => {
                 type: "section",
                 text: {
                     type: "mrkdwn",
-                    text: "Time of Day, in UTC (sorry)"
+                    text: "Time of the Day, in UTC (sorry)"
                 },
                 accessory: {
-                    type: "multi_static_select",
+                    type: "static_select",
                     placeholder: {
                         type: "plain_text",
                         text: "Select an item",
                         emoji: true
                     },
-                    options: [...Array(24).keys()].map(timeSelectOption)
+                        options: [...Array(24).keys()].map(time => {
+                            return {
+                                text: {
+                                    type: "plain_text",
+                                    text: `${time.toString()}:00`
+                                },
+                                value: time.toString()
+                            }
+                        })
                 }
             },
             {
@@ -97,14 +105,4 @@ export const nonsenseModal = (): View => {
                 }
             }]
     };
-};
-
-const timeSelectOption = (num: number): Option => {
-    return {
-        text: {
-            type: "plain_text",
-            text: num.toString()
-        },
-        value: num.toString()
-    }
 };
