@@ -1,29 +1,31 @@
-import * as express from "express";
-import {Pool} from "pg";
+import {Middleware, SlackCommandMiddlewareArgs} from "@slack/bolt";
+import {Block} from "@slack/types";
+
+import {Reader} from "fp-ts/lib/Reader";
+
 import {markdownSection} from "../view";
 import {getActionItemMenu} from "../menu";
+import {AppDependencies} from "../app";
 
-export const slashActionHandler = (pool: Pool) => {
-    return (request: express.Request, response: express.Response) => {
-        console.log(`handling menu ${JSON.stringify(request.body)}`);
+export const actionCommandHandler: Reader<AppDependencies, Middleware<SlackCommandMiddlewareArgs>> =
+    new Reader<AppDependencies, Middleware<SlackCommandMiddlewareArgs>>((dependencies: AppDependencies) =>
+        async ({command, ack, say, respond}) => {
+            await ack();
 
-        const workspaceId = request.body.team_id.toString();
-        const channelId = request.body.channel_id.toString();
+            const workspaceId = command.team_id;
+            const channelId = command.channel_id;
 
-        getActionItemMenu(workspaceId, channelId, pool)
-            .then((blocks: any) => {
-                return response.status(200).send({
-                    blocks: blocks
+            const blocks: Block[] = await getActionItemMenu(workspaceId, channelId, dependencies.pool)
+                .catch((err: any) => {
+                    console.error(`error fetching items: ${err}`);
+
+                    return [
+                        markdownSection(`something went wrong. please try again`),
+                    ];
                 });
-            })
-            .catch((err: any) => {
-                console.error(`error fetching items: ${err}`);
-                response.status(200).send({
-                    blocks: [
-                        markdownSection(`something went wrong...`),
-                    ]
-                });
+
+            return respond({
+                response_type: "ephemeral",
+                blocks: blocks,
             });
-
-    };
-};
+        });

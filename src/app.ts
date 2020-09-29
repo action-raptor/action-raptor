@@ -6,7 +6,7 @@ import {Pool} from "pg";
 
 import {landingHandler, privacyHandler, supportHandler} from "./handlers/other.handler";
 
-import {slashActionHandler} from "./handlers/slash_action.handler";
+import {actionCommandHandler} from "./handlers/slash_action.handler";
 import {blockActionHandler} from "./handlers/block_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {eventHandler} from "./handlers/event.handler";
@@ -28,7 +28,7 @@ export async function buildApp(dependencies: AppDependencies) {
     receiver.router.use(bodyParser.json());
     receiver.router.use(bodyParser.urlencoded({extended: true}));
 
-    receiver.router.post("/action", slashActionHandler(dependencies.pool));
+    app.command("/action", actionCommandHandler.run(dependencies));
     receiver.router.post("/action/block", blockActionHandler(dependencies.pool));
     receiver.router.get("/auth/redirect", oauthRedirectHandler(dependencies));
     receiver.router.post("/event", eventHandler(dependencies.pool));
