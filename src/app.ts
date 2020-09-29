@@ -1,4 +1,6 @@
 import {App, ExpressReceiver} from "@slack/bolt";
+import * as bodyParser from "body-parser";
+import * as cors from "cors";
 import {RequestPromiseAPI} from "request-promise";
 import {Pool} from "pg";
 
@@ -21,6 +23,10 @@ export async function buildApp(dependencies: AppDependencies) {
         token: process.env.SLACK_TOKEN,
         receiver
     });
+
+    receiver.router.use(cors({origin: true}));
+    receiver.router.use(bodyParser.json());
+    receiver.router.use(bodyParser.urlencoded({extended: true}));
 
     receiver.router.post("/action", slashActionHandler(dependencies.pool));
     receiver.router.post("/action/block", blockActionHandler(dependencies.pool));
