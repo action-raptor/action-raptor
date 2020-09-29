@@ -1,7 +1,8 @@
+import {Block} from "@slack/types";
 import {Pool} from "pg";
 import {divider, editableActionLine, listFooter, markdownSection} from "./view";
 
-export const getActionItemMenu = (workspaceId: string, channelId: string, pool: Pool) => {
+export const getActionItemMenu = (workspaceId: string, channelId: string, pool: Pool): Promise<Block[]> => {
     const query = {
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
@@ -27,7 +28,7 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, pool: 
         });
 };
 
-export const getActionItemsPublic = (workspaceId: string, channelId: string, pool: Pool) => {
+export const getActionItemsPublic = (workspaceId: string, channelId: string, pool: Pool): Promise<Block[]> => {
     const query = {
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
