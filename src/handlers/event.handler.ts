@@ -1,10 +1,10 @@
-import {Client} from "pg";
+import {Pool} from "pg";
 import * as express from "express";
+import * as moment from "moment";
 import {publishHomeView} from "../slack_api";
 import {homeView} from "../view";
-import * as moment from "moment";
 
-export const eventHandler = (client: Client) => {
+export const eventHandler = (pool: Pool) => {
     return (request: express.Request, response: express.Response) => {
         console.log(`handling event: ${JSON.stringify(request.body)}`);
 
@@ -22,32 +22,32 @@ export const eventHandler = (client: Client) => {
         const userId = event.user;
         const workspaceId = request.body.team_id;
 
-        updateHomeTab(userId, workspaceId, client)
+        updateHomeTab(userId, workspaceId, pool)
             .catch(err => {
                 console.log(`an error occurred handling events: ${err}`);
             });
     };
 };
 
-const updateHomeTab = async (userId: string, workspaceId: string, client: Client) => {
-    const result = await client.query({
+const updateHomeTab = async (userId: string, workspaceId: string, pool: Pool) => {
+    const result = await pool.query({
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND owner = $2",
         values: [workspaceId, userId]
     });
 
-    const completeds = result.rows.filter(row => row.status === 'COMPLETED');
+    const completedItems = result.rows.filter(row => row.status === 'COMPLETED');
 
-    const avgMs = completeds.length > 0 ?
-        completeds
+    const avgMs = completedItems.length > 0 ?
+        completedItems
             .map(row => row.closed_at.getTime() - row.created_at.getTime())
-            .reduce((acc, current) => acc + current) / completeds.length
+            .reduce((acc, current) => acc + current) / completedItems.length
         : 0;
     const averageTimeString = moment.duration(avgMs).humanize();
 
     const openItems = result.rows
         .filter(row => row.status === 'OPEN');
 
-    const homeViewBlocks = homeView(averageTimeString, completeds.length, openItems);
+    const homeViewBlocks = homeView(averageTimeString, completedItems.length, openItems);
 
-    publishHomeView(userId, workspaceId, client, homeViewBlocks);
+    await publishHomeView(userId, workspaceId, pool, homeViewBlocks);
 };
