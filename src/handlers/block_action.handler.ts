@@ -1,21 +1,21 @@
 import * as express from "express";
 import * as rp from "request-promise";
-import {fetchToken, deleteMessage, postToChannel} from "../slack_api";
-import {Client} from "pg";
+import {deleteMessage, fetchToken, postToChannel} from "../slack_api";
+import {Pool} from "pg";
 import {addItemModal, markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
 import {Block} from "@slack/types";
 
-export const blockActionHandler = (client: Client) => {
+export const blockActionHandler = (pool: Pool) => {
     return (request: express.Request, response: express.Response) => {
         const payload = JSON.parse(request.body.payload);
 
         switch (payload.type) {
             case "block_actions":
-                routeBlockActions(payload, response, client);
+                routeBlockActions(payload, response, pool);
                 break;
             case "view_submission":
-                handleAddActionItem(payload, response, client);
+                handleAddActionItem(payload, response, pool);
                 break;
             default:
                 console.error("received unknown payload type");
@@ -24,7 +24,7 @@ export const blockActionHandler = (client: Client) => {
     }
 };
 
-function routeBlockActions(payload: any, response: express.Response, client: Client) {
+function routeBlockActions(payload: any, response: express.Response, pool: Pool) {
     if (payload.actions.length < 1) {
         console.error("got a block action payload with no actions");
         response.status(200).send();
@@ -33,31 +33,31 @@ function routeBlockActions(payload: any, response: express.Response, client: Cli
     const actionId = payload.actions[0].action_id;
 
     if (actionId === "add_action_item") {
-        handleAddClicked(payload, response, client);
+        handleAddClicked(payload, response, pool);
     } else if (actionId === "post_to_channel") {
-        handlePost(payload, response, client);
+        handlePost(payload, response, pool);
     } else if (actionId === "close_menu") {
         handleCloseClicked(payload, response);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
-        handleCompleteAction(payload, response, docId, client)
+        handleCompleteAction(payload, response, docId, pool)
             .catch(err => {
                 console.error(`error in complete flow: ${err}`);
             });
     }
 }
 
-function handlePost(payload: any, response: express.Response, client: Client) {
+function handlePost(payload: any, response: express.Response, pool: Pool) {
     console.log(`handling post to channel ${JSON.stringify(payload)}`);
 
     const workspaceId = payload.team.id;
     const channelId = payload.channel.id;
     const responseUrl = payload.response_url;
 
-    getActionItemsPublic(workspaceId, channelId, client)
+    getActionItemsPublic(workspaceId, channelId, pool)
         .then(blocks => {
             console.log(`fetched action items`);
-            return postToChannel(workspaceId, channelId, blocks, client);
+            return postToChannel(workspaceId, channelId, blocks, pool);
         })
         .then((resp) => {
             console.log(`got a response from slack: ${JSON.stringify(resp)}`);
@@ -71,7 +71,7 @@ function handlePost(payload: any, response: express.Response, client: Client) {
 }
 
 
-function handleAddClicked(payload: any, response: express.Response, client: Client) {
+function handleAddClicked(payload: any, response: express.Response, pool: Pool) {
     console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
     response.status(200).send();
 
@@ -81,7 +81,7 @@ function handleAddClicked(payload: any, response: express.Response, client: Clie
         response_url: payload.response_url
     });
 
-    fetchToken(payload.team.id, client)
+    fetchToken(payload.team.id, pool)
         .then((token) => {
             const options = {
                 method: 'POST',
@@ -107,7 +107,7 @@ function handleAddClicked(payload: any, response: express.Response, client: Clie
         });
 }
 
-function handleAddActionItem(payload: any, response: express.Response, client: Client) {
+function handleAddActionItem(payload: any, response: express.Response, pool: Pool) {
     console.log(`handling add action item: ${JSON.stringify(payload)}`);
 
     const owner = payload.view.state.values.owner_select?.selected_item_owner?.selected_user;
@@ -122,10 +122,10 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
     const queryText = "INSERT INTO action_items(description, workspace_id, channel_id, owner, status) VALUES($1, $2, $3, $4, $5)";
     const queryValues = [itemDescription, workspaceId, channelId, owner, itemStatus];
 
-    client.query(queryText, queryValues)
+    pool.query(queryText, queryValues)
         .then(() => {
             console.log("action item saved");
-            return getActionItemMenu(workspaceId, channelId, client);
+            return getActionItemMenu(workspaceId, channelId, pool);
         })
         .then(blocks => {
             return updateMenu(metadata.response_url, blocks);
@@ -137,7 +137,7 @@ function handleAddActionItem(payload: any, response: express.Response, client: C
     response.status(200).send();
 }
 
-async function handleCompleteAction(payload: any, response: express.Response, actionId: string, client: Client) {
+async function handleCompleteAction(payload: any, response: express.Response, actionId: string, pool: Pool) {
     console.log(`handling complete action: ${JSON.stringify(payload)}`);
     response.status(200).send();
 
@@ -145,19 +145,19 @@ async function handleCompleteAction(payload: any, response: express.Response, ac
     const channelId = payload.channel.id;
     const username = payload.user.name;
 
-    const findResult = await client.query('select * from action_items where id=$1', [actionId]);
+    const findResult = await pool.query('select * from action_items where id=$1', [actionId]);
     const itemDescription = findResult.rows[0].description;
 
 
     const now = new Date();
-    await client.query("UPDATE action_items SET status='COMPLETED', closed_at=$1 WHERE id=$2", [now, actionId]);
+    await pool.query("UPDATE action_items SET status='COMPLETED', closed_at=$1 WHERE id=$2", [now, actionId]);
     console.log(`completed action. action_id=${actionId}. channel_id=${channelId}. workspace_id=${workspaceId}`);
 
-    const blocks = await getActionItemMenu(workspaceId, channelId, client);
+    const blocks = await getActionItemMenu(workspaceId, channelId, pool);
     const updateResp = await updateMenu(payload.response_url, blocks);
     console.log(`update menu response: ${JSON.stringify(updateResp)}`);
 
-    return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], client);
+    return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], pool);
 }
 
 function handleCloseClicked(payload: any, response: express.Response) {

@@ -1,13 +1,13 @@
-import {Client} from "pg";
+import {Pool} from "pg";
 import {divider, editableActionLine, listFooter, markdownSection} from "./view";
 
-export const getActionItemMenu = (workspaceId: string, channelId: string, client: Client) => {
+export const getActionItemMenu = (workspaceId: string, channelId: string, pool: Pool) => {
     const query = {
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
     };
 
-    return client.query(query)
+    return pool.query(query)
         .then(res => {
             console.log(`retrieved ${res.rows.length} items for channel menu`);
 
@@ -27,13 +27,13 @@ export const getActionItemMenu = (workspaceId: string, channelId: string, client
         });
 };
 
-export const getActionItemsPublic = (workspaceId: string, channelId: string, client: Client) => {
+export const getActionItemsPublic = (workspaceId: string, channelId: string, pool: Pool) => {
     const query = {
         text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
         values: [workspaceId, channelId]
     };
 
-    return client.query(query)
+    return pool.query(query)
         .then(res => {
             const itemBlocks = res.rows.map((row) => {
                 const text = row.owner

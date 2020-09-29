@@ -1,9 +1,9 @@
 import {Block} from "@slack/types";
 import * as rp from "request-promise";
-import {Client} from "pg";
+import {Pool} from "pg";
 
-export const postToChannel = (workspaceId: string, channelId: string, blocks: (Block)[], client: Client) => {
-    return fetchToken(workspaceId, client)
+export const postToChannel = (workspaceId: string, channelId: string, blocks: (Block)[], pool: Pool) => {
+    return fetchToken(workspaceId, pool)
         .then(token => {
             console.log(`fetched bot token`);
             const options = {
@@ -24,8 +24,8 @@ export const postToChannel = (workspaceId: string, channelId: string, blocks: (B
         });
 };
 
-export const publishHomeView = async (userId: string, workspaceId: string, client: Client, blocks: any[]) => {
-    const token = await fetchToken(workspaceId, client);
+export const publishHomeView = async (userId: string, workspaceId: string, pool: Pool, blocks: any[]) => {
+    const token = await fetchToken(workspaceId, pool);
     const options = {
         method: 'POST',
         uri: `https://slack.com/api/views.publish`,
@@ -46,13 +46,13 @@ export const publishHomeView = async (userId: string, workspaceId: string, clien
     return rp(options);
 };
 
-export const fetchToken = (workspaceId: string, client: Client) => {
+export const fetchToken = (workspaceId: string, pool: Pool) => {
     const query = {
         text: "SELECT * FROM slack_tokens WHERE workspace_id = $1",
         values: [workspaceId]
     };
 
-    return client.query(query)
+    return pool.query(query)
         .then(res => {
             return res.rows[0]?.value;
         });
