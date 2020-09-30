@@ -7,9 +7,9 @@ import {Pool} from "pg";
 import {landingHandler, privacyHandler, supportHandler} from "./handlers/other.handler";
 
 import {actionCommandHandler} from "./handlers/slash_action.handler";
+import {appHomeOpenedHandler} from "./handlers/event.app_home_opened.handler";
 import {blockActionHandler} from "./handlers/block_action.handler";
 import {oauthRedirectHandler} from "./handlers/auth.handler";
-import {eventHandler} from "./handlers/event.handler";
 import {setupReminders} from "./reminders";
 
 export type AppDependencies = {
@@ -30,8 +30,10 @@ export async function buildApp(dependencies: AppDependencies) {
 
     app.command("/action", actionCommandHandler.run(dependencies));
     receiver.router.post("/action/block", blockActionHandler(dependencies.pool));
+
+    app.event<"app_home_opened">("app_home_opened", appHomeOpenedHandler.run(dependencies));
+
     receiver.router.get("/auth/redirect", oauthRedirectHandler(dependencies));
-    receiver.router.post("/event", eventHandler(dependencies.pool));
 
     receiver.router.get("/", landingHandler);
     receiver.router.get("/privacy-policy", privacyHandler);
