@@ -24,28 +24,6 @@ export const postToChannel = (workspaceId: string, channelId: string, blocks: (B
         });
 };
 
-export const publishHomeView = async (userId: string, workspaceId: string, pool: Pool, blocks: any[]) => {
-    const token = await fetchToken(workspaceId, pool);
-    const options = {
-        method: 'POST',
-        uri: `https://slack.com/api/views.publish`,
-        headers: {
-            'Content-type': 'application/json',
-            Authorization: `Bearer ${token}`
-        },
-        body: {
-            user_id: userId,
-            view: {
-                type: "home",
-                blocks: blocks
-            }
-        },
-        json: true
-    };
-
-    return rp(options);
-};
-
 export const fetchToken = (workspaceId: string, pool: Pool) => {
     const query = {
         text: "SELECT * FROM slack_tokens WHERE workspace_id = $1",
