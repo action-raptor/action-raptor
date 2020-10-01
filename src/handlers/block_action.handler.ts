@@ -1,10 +1,10 @@
+import {Block} from "@slack/types";
 import * as express from "express";
 import * as rp from "request-promise";
-import {deleteMessage, fetchToken, postToChannel} from "../slack_api";
 import {Pool} from "pg";
-import {addItemModal, markdownSection} from "../view";
+import {deleteMessage, postToChannel} from "../slack_api";
+import {markdownSection} from "../view";
 import {getActionItemMenu, getActionItemsPublic} from "../menu";
-import {Block} from "@slack/types";
 
 export const blockActionHandler = (pool: Pool) => {
     return (request: express.Request, response: express.Response) => {
@@ -32,9 +32,7 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
 
     const actionId = payload.actions[0].action_id;
 
-    if (actionId === "add_action_item") {
-        handleAddClicked(payload, response, pool);
-    } else if (actionId === "post_to_channel") {
+    if (actionId === "post_to_channel") {
         handlePost(payload, response, pool);
     } else if (actionId === "close_menu") {
         handleCloseClicked(payload, response);
@@ -68,43 +66,6 @@ function handlePost(payload: any, response: express.Response, pool: Pool) {
         });
 
     response.status(200).send();
-}
-
-
-function handleAddClicked(payload: any, response: express.Response, pool: Pool) {
-    console.log(`handling add action item clicked ${JSON.stringify(payload)}`);
-    response.status(200).send();
-
-    const metadata = JSON.stringify({
-        workspace_id: payload.team.id,
-        channel_id: payload.channel.id,
-        response_url: payload.response_url
-    });
-
-    fetchToken(payload.team.id, pool)
-        .then((token) => {
-            const options = {
-                method: 'POST',
-                uri: 'https://slack.com/api/views.open',
-                headers: {
-                    'Content-type': 'application/json; charset=utf-8',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: {
-                    trigger_id: payload.trigger_id,
-                    view: addItemModal(metadata)
-                },
-                json: true
-            };
-
-            return rp(options);
-        })
-        .then((resp: any) => {
-            console.log(`got response from slack: ${JSON.stringify(resp)}`);
-        })
-        .catch((err: any) => {
-            console.log(`request failed: ${JSON.stringify(err)}`);
-        });
 }
 
 function handleAddActionItem(payload: any, response: express.Response, pool: Pool) {
