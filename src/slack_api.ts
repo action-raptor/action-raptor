@@ -24,7 +24,7 @@ export const postToChannel = (workspaceId: string, channelId: string, blocks: (B
         });
 };
 
-export const fetchToken = (workspaceId: string, pool: Pool) => {
+const fetchToken = (workspaceId: string, pool: Pool) => {
     const query = {
         text: "SELECT * FROM slack_tokens WHERE workspace_id = $1",
         values: [workspaceId]
@@ -34,20 +34,4 @@ export const fetchToken = (workspaceId: string, pool: Pool) => {
         .then(res => {
             return res.rows[0]?.value;
         });
-};
-
-export const deleteMessage = (responseUrl: string) => {
-    const options = {
-        method: 'POST',
-        uri: responseUrl,
-        headers: {
-            'Content-type': 'application/json; charset=utf-8',
-        },
-        body: {
-            delete_original: "true"
-        },
-        json: true
-    };
-
-    rp(options);
 };

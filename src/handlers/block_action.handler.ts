@@ -2,7 +2,7 @@ import {Block} from "@slack/types";
 import * as express from "express";
 import * as rp from "request-promise";
 import {Pool} from "pg";
-import {deleteMessage, postToChannel} from "../slack_api";
+import {postToChannel} from "../slack_api";
 import {markdownSection} from "../view";
 import {getActionItemMenu} from "../menu";
 
@@ -32,9 +32,7 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
 
     const actionId = payload.actions[0].action_id;
 
-    if (actionId === "close_menu") {
-        handleCloseClicked(payload, response);
-    } else if (actionId.includes("complete")) {
+    if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
         handleCompleteAction(payload, response, docId, pool)
             .catch(err => {
@@ -94,13 +92,6 @@ async function handleCompleteAction(payload: any, response: express.Response, ac
     console.log(`update menu response: ${JSON.stringify(updateResp)}`);
 
     return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], pool);
-}
-
-function handleCloseClicked(payload: any, response: express.Response) {
-    console.log("handling close clicked");
-    response.status(200).send();
-
-    deleteMessage(payload.response_url);
 }
 
 function updateMenu(response_url: string, blocks: (Block)[]) {
