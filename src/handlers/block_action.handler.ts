@@ -4,7 +4,7 @@ import * as rp from "request-promise";
 import {Pool} from "pg";
 import {deleteMessage, postToChannel} from "../slack_api";
 import {markdownSection} from "../view";
-import {getActionItemMenu, getActionItemsPublic} from "../menu";
+import {getActionItemMenu} from "../menu";
 
 export const blockActionHandler = (pool: Pool) => {
     return (request: express.Request, response: express.Response) => {
@@ -32,9 +32,7 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
 
     const actionId = payload.actions[0].action_id;
 
-    if (actionId === "post_to_channel") {
-        handlePost(payload, response, pool);
-    } else if (actionId === "close_menu") {
+    if (actionId === "close_menu") {
         handleCloseClicked(payload, response);
     } else if (actionId.includes("complete")) {
         const docId = actionId.split(":")[1];
@@ -43,29 +41,6 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
                 console.error(`error in complete flow: ${err}`);
             });
     }
-}
-
-function handlePost(payload: any, response: express.Response, pool: Pool) {
-    console.log(`handling post to channel ${JSON.stringify(payload)}`);
-
-    const workspaceId = payload.team.id;
-    const channelId = payload.channel.id;
-    const responseUrl = payload.response_url;
-
-    getActionItemsPublic(workspaceId, channelId, pool)
-        .then(blocks => {
-            console.log(`fetched action items`);
-            return postToChannel(workspaceId, channelId, blocks, pool);
-        })
-        .then((resp) => {
-            console.log(`got a response from slack: ${JSON.stringify(resp)}`);
-            deleteMessage(responseUrl);
-        })
-        .catch(err => {
-            console.log(`error: ${err}`);
-        });
-
-    response.status(200).send();
 }
 
 function handleAddActionItem(payload: any, response: express.Response, pool: Pool) {
