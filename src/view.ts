@@ -1,4 +1,5 @@
 import {ActionsBlock, DividerBlock, SectionBlock} from "@slack/types";
+import {arMenuActions} from "./model.menu_actions";
 
 export const markdownSection = (text: string): SectionBlock => {
     return ({
@@ -19,7 +20,7 @@ export const editableActionLine = (text: string, actionId: string): SectionBlock
         },
         accessory: {
             "type": "button",
-            "action_id": `complete:${actionId}`,
+            "action_id": `${arMenuActions.completeActionItem}:${actionId}`,
             "text": {
                 "type": "plain_text",
                 "text": "Complete",
@@ -34,7 +35,7 @@ export const listFooter = (): ActionsBlock => {
         elements: [
             {
                 type: "button",
-                action_id: "close_menu",
+                action_id: arMenuActions.closeMenu,
                 text: {
                     type: "plain_text",
                     text: "Close"
@@ -43,7 +44,7 @@ export const listFooter = (): ActionsBlock => {
             },
             {
                 type: "button",
-                action_id: "add_action_item",
+                action_id: arMenuActions.addActionItem,
                 text: {
                     type: "plain_text",
                     text: "Add"
@@ -51,7 +52,7 @@ export const listFooter = (): ActionsBlock => {
             },
             {
                 type: "button",
-                action_id: "post_to_channel",
+                action_id: arMenuActions.postToChannel,
                 text: {
                     type: "plain_text",
                     text: "Post"
