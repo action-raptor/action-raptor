@@ -1,4 +1,4 @@
-import {ActionsBlock, DividerBlock, SectionBlock, View} from "@slack/types";
+import {ActionsBlock, DividerBlock, SectionBlock} from "@slack/types";
 
 export const markdownSection = (text: string): SectionBlock => {
     return ({
@@ -11,7 +11,7 @@ export const markdownSection = (text: string): SectionBlock => {
 };
 
 export const editableActionLine = (text: string, actionId: string): SectionBlock => {
-    return ({
+    return {
         type: "section",
         text: {
             type: "mrkdwn",
@@ -25,7 +25,7 @@ export const editableActionLine = (text: string, actionId: string): SectionBlock
                 "text": "Complete",
             }
         }
-    });
+    };
 };
 
 export const listFooter = (): ActionsBlock => {
@@ -59,62 +59,6 @@ export const listFooter = (): ActionsBlock => {
                 style: "primary"
             },
         ]
-    }
-};
-
-export const addItemModal = (metadata: string): View => {
-    return {
-        type: "modal",
-        title: {
-            type: "plain_text",
-            text: "New Action Item",
-            emoji: true
-        },
-        submit: {
-            type: "plain_text",
-            text: "Add",
-            emoji: true
-        },
-        close: {
-            type: "plain_text",
-            text: "Cancel",
-            emoji: true
-        },
-        blocks: [
-            {
-                type: "input",
-                block_id: "item_description",
-                element: {
-                    type: "plain_text_input",
-                    action_id: "title",
-                    placeholder: {
-                        type: "plain_text",
-                        text: "What needs done?"
-                    }
-                },
-                label: {
-                    type: "plain_text",
-                    text: "Description"
-                }
-            },
-            {
-                type: "input",
-                block_id: "owner_select",
-                label: {
-                    type: "plain_text",
-                    text: "Action Item Owner"
-                },
-                element: {
-                    action_id: "selected_item_owner",
-                    type: "users_select",
-                    placeholder: {
-                        type: "plain_text",
-                        text: "Select an item"
-                    }
-                }
-            }
-        ],
-        private_metadata: metadata
     }
 };
 
