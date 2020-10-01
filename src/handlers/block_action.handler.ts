@@ -5,6 +5,7 @@ import {Pool} from "pg";
 import {postToChannel} from "../slack_api";
 import {markdownSection} from "../view";
 import {getActionItemMenu} from "../menu";
+import {arMenuActions} from "../model.menu_actions";
 
 export const blockActionHandler = (pool: Pool) => {
     return (request: express.Request, response: express.Response) => {
@@ -32,7 +33,7 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
 
     const actionId = payload.actions[0].action_id;
 
-    if (actionId.includes("complete")) {
+    if (actionId.includes(arMenuActions.completeActionItem)) {
         const docId = actionId.split(":")[1];
         handleCompleteAction(payload, response, docId, pool)
             .catch(err => {
