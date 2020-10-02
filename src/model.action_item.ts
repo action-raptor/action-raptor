@@ -4,6 +4,7 @@ export type ActionItem =
     ;
 
 export type CompletedActionItem = {
+    id: string
     status: "COMPLETED"
     created_at: Date
     last_updated: Date
@@ -16,6 +17,7 @@ export type CompletedActionItem = {
 };
 
 export type OpenActionItem = {
+    id: string
     status: "OPEN"
     created_at: Date
     last_updated: Date
