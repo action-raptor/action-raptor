@@ -44,7 +44,7 @@ export const listFooter = (): ActionsBlock => {
             },
             {
                 type: "button",
-                action_id: arMenuActions.addActionItem,
+                action_id: arMenuActions.openActionItemModal,
                 text: {
                     type: "plain_text",
                     text: "Add"
