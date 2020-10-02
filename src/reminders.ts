@@ -1,7 +1,7 @@
 import {Pool} from "pg";
 import * as schedule from "node-schedule";
 import {RequestPromiseAPI} from "request-promise";
-import {ChatPostMessageArguments, WebClient} from "@slack/web-api";
+import {WebClient} from "@slack/web-api";
 
 import {getActionItemsPublic} from "./menu";
 import {arSlackTokens} from "./slack_bot_tokens";
@@ -34,9 +34,10 @@ const remindInChannel = async (workspaceId: string, channelId: string, dependenc
     try {
         const blocks = await getActionItemsPublic(workspaceId, channelId, dependencies);
 
-        await dependencies.client.chat.postMessage(<ChatPostMessageArguments>{
+        await dependencies.client.chat.postMessage({
             token: await arSlackTokens.workspace(workspaceId).bot.get.run(dependencies),
             channel: channelId,
+            text: "Here are all open action items",
             blocks: blocks,
         });
 

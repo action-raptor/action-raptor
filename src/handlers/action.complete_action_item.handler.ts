@@ -1,10 +1,11 @@
 import {BlockAction, Context, Middleware, SlackActionMiddlewareArgs} from "@slack/bolt";
+import {Block} from "@slack/types";
+
 import {Reader} from "fp-ts/lib/Reader";
+
 import {AppDependencies} from "../app";
 import {markdownSection} from "../view";
-import {Block} from "@slack/types";
 import {ActionItem} from "../model.action_item";
-import {ChatPostMessageArguments} from "@slack/web-api";
 import {getActionItemMenu} from "../menu";
 
 export const completeActionItemActionHandler: Reader<AppDependencies, Middleware<SlackActionMiddlewareArgs<BlockAction>>> =
@@ -29,8 +30,9 @@ export const completeActionItemActionHandler: Reader<AppDependencies, Middleware
 
                 const notificationSettings = await fetchNotificationSettings(workspaceId, channelId).run(dependencies);
                 if (notificationSettings.on_action_complete) {
-                    await client.chat.postMessage(<ChatPostMessageArguments>{
+                    await client.chat.postMessage({
                         channel: channelId,
+                        text: `<@${body.user.id}> completed "${actionItem.description}"`,
                         blocks: [markdownSection(`<@${body.user.id}> completed "${actionItem.description}"`)],
                     });
                 }

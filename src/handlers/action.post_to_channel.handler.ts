@@ -1,6 +1,5 @@
 import {BlockAction, Context, Middleware, SlackActionMiddlewareArgs} from "@slack/bolt";
 import {Block} from "@slack/types";
-import {ChatPostMessageArguments} from "@slack/web-api";
 import {Reader} from "fp-ts/lib/Reader";
 import {AppDependencies} from "../app";
 import {markdownSection} from "../view";
@@ -18,8 +17,9 @@ export const postToChannelActionHandler: Reader<AppDependencies, Middleware<Slac
             try {
                 const blocks = await getActionItemsPublic(workspaceId, channelId, dependencies);
 
-                await client.chat.postMessage(<ChatPostMessageArguments>{
+                await client.chat.postMessage({
                     channel: channelId,
+                    text: "Here are all open action items",
                     blocks: blocks,
                 });
                 await respond({
