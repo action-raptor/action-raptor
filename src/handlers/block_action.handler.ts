@@ -15,9 +15,6 @@ export const blockActionHandler = (pool: Pool) => {
             case "block_actions":
                 routeBlockActions(payload, response, pool);
                 break;
-            case "view_submission":
-                handleAddActionItem(payload, response, pool);
-                break;
             default:
                 console.error("received unknown payload type");
                 response.status(200).send();
@@ -40,36 +37,6 @@ function routeBlockActions(payload: any, response: express.Response, pool: Pool)
                 console.error(`error in complete flow: ${err}`);
             });
     }
-}
-
-function handleAddActionItem(payload: any, response: express.Response, pool: Pool) {
-    console.log(`handling add action item: ${JSON.stringify(payload)}`);
-
-    const owner = payload.view.state.values.owner_select?.selected_item_owner?.selected_user;
-
-    const metadata = JSON.parse(payload.view.private_metadata);
-
-    const workspaceId = metadata.workspace_id.toString();
-    const channelId = metadata.channel_id.toString();
-    const itemDescription = payload.view.state.values.item_description.title.value.toString();
-    const itemStatus = 'OPEN';
-
-    const queryText = "INSERT INTO action_items(description, workspace_id, channel_id, owner, status) VALUES($1, $2, $3, $4, $5)";
-    const queryValues = [itemDescription, workspaceId, channelId, owner, itemStatus];
-
-    pool.query(queryText, queryValues)
-        .then(() => {
-            console.log("action item saved");
-            return getActionItemMenu(workspaceId, channelId, pool);
-        })
-        .then(blocks => {
-            return updateMenu(metadata.response_url, blocks);
-        })
-        .catch(err => {
-            console.error(`error saving action item: ${err}`);
-        });
-
-    response.status(200).send();
 }
 
 async function handleCompleteAction(payload: any, response: express.Response, actionId: string, pool: Pool) {
@@ -95,10 +62,10 @@ async function handleCompleteAction(payload: any, response: express.Response, ac
     return await postToChannel(workspaceId, channelId, [markdownSection(`${username} completed "${itemDescription}"`)], pool);
 }
 
-function updateMenu(response_url: string, blocks: (Block)[]) {
+function updateMenu(responseUrl: string, blocks: (Block)[]) {
     const options = {
         method: 'POST',
-        uri: response_url,
+        uri: responseUrl,
         headers: {
             'Content-type': 'application/json; charset=utf-8',
         },
