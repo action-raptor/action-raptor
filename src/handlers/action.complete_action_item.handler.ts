@@ -49,13 +49,14 @@ export const completeActionItemActionHandler: Reader<AppDependencies, Middleware
                     blocks: buildErrorResponse(err, context),
                 });
 
-                console.log(`unexpected error while completing action item. ${JSON.stringify({
+                console.error(`unexpected error while completing action item. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
                     user_id: userId,
                     action_item_id: actionItemId,
                     err: err.toString(),
                 })}`);
+                console.error(err);
             }
         }
     );

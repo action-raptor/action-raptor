@@ -26,12 +26,13 @@ export const openActionItemModalActionHandler: Reader<AppDependencies, Middlewar
                     result: viewOpenResult,
                 })}`);
             } catch (err) {
-                console.log(`unexpected error while opening modal view. ${JSON.stringify({
+                console.error(`unexpected error while opening modal view. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
                     user_id: userId,
                     err: err
                 })}`);
+                console.error(err);
             }
         }
     );

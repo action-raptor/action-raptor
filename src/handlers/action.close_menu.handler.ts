@@ -29,12 +29,12 @@ export const closeMenuActionHandler: Reader<AppDependencies, Middleware<SlackAct
                     blocks: buildErrorResponse(err, context),
                 });
 
-                console.log(`unexpected error while closing the menu. ${JSON.stringify({
+                console.error(`unexpected error while closing the menu. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
                     err: err.toString(),
                 })}`);
-
+                console.error(err);
             }
         }
     );

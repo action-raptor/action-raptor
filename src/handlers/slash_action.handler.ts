@@ -35,12 +35,13 @@ export const actionCommandHandler: Reader<AppDependencies, Middleware<SlackComma
                     blocks: buildErrorResponse(err, context),
                 });
 
-                console.log(`unexpected error while opening menu. ${JSON.stringify({
+                console.error(`unexpected error while opening menu. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
                     user_id: userId,
                     err: err
                 })}`);
+                console.error(err);
             }
         });
 

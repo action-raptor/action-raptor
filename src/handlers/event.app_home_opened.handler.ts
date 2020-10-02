@@ -39,11 +39,12 @@ export const appHomeOpenedHandler: Reader<AppDependencies, Middleware<SlackEvent
                 result: viewPublishResult
             })}`);
         } catch (err) {
-            console.log(`unexpected error while updating home view. ${JSON.stringify({
+            console.error(`unexpected error while updating home view. ${JSON.stringify({
                 workspace_id: workspaceId,
                 user_id: userId,
                 err: err
             })}`);
+            console.error(err);
         }
     });
 

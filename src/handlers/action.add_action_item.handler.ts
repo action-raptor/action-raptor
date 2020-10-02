@@ -43,12 +43,13 @@ export const addActionItemActionHandler: Reader<AppDependencies, Middleware<Slac
                     buildErrorResponse(err, context),
                 );
 
-                console.log(`unexpected error while adding action item. ${JSON.stringify({
+                console.error(`unexpected error while adding action item. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
                     user_id: userId,
                     err: err
                 })}`);
+                console.error(err);
             }
         }
     );
