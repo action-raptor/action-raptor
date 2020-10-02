@@ -1,4 +1,5 @@
 import {App, BlockAction, ExpressReceiver, ViewSubmitAction} from "@slack/bolt";
+import {Installation, InstallationQuery} from "@slack/oauth";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import {RequestPromiseAPI} from "request-promise";
@@ -16,6 +17,9 @@ import {closeMenuActionHandler} from "./handlers/action.close_menu.handler";
 import {completeActionItemActionHandler} from "./handlers/action.complete_action_item.handler";
 import {arMenuActions} from "./model.menu_actions";
 import {openActionItemModalActionHandler} from "./handlers/action.open_action_item_modal.handler";
+import {clientId, clientSecret, signingSecret} from "./config";
+import {arSlackTokens} from "./slack_bot_tokens";
+import {addBotInfoToBotTokens} from "./data_migrations/add_bot_id_to_slack_tokens";
 
 export type AppDependencies = {
     pool: Pool
@@ -23,9 +27,34 @@ export type AppDependencies = {
 };
 
 export async function buildApp(dependencies: AppDependencies) {
-    const receiver = new ExpressReceiver({signingSecret: process.env.SLACK_SIGNING_SECRET!});
+    const receiver = new ExpressReceiver({
+        signingSecret: signingSecret,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        stateSecret: "action-raptor-state-secret",
+        scopes: ["channels:read", "chat:write", "commands", "team:read", "users:read", "users:read.email", "users:write",],
+        installationStore: {
+            storeInstallation: async (installation: Installation): Promise<void> => {
+                arSlackTokens.workspace(installation.team.id)
+                    .bot
+                    .save(installation.bot?.id!, installation.bot?.userId!, installation.bot?.token!)
+                    .run(dependencies)
+            },
+            fetchInstallation: async (query: InstallationQuery): Promise<Installation> =>
+                arSlackTokens.workspace(query.teamId)
+                    .bot
+                    .get
+                    .run(dependencies)
+                    .then(token => (<Installation>{
+                        bot: {
+                            id: token.bot_id,
+                            userId: token.bot_user_id,
+                            token: token.value
+                        }
+                    })),
+        },
+    });
     const app = new App({
-        token: process.env.SLACK_TOKEN,
         receiver,
     });
 
@@ -54,6 +83,10 @@ export async function buildApp(dependencies: AppDependencies) {
     receiver.router.get("/support", supportHandler);
 
     await setupReminders({
+        ...dependencies,
+        client: app.client,
+    });
+    await addBotInfoToBotTokens({
         ...dependencies,
         client: app.client,
     });

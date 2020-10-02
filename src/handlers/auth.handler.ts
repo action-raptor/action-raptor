@@ -6,6 +6,7 @@ import {ReaderTaskEither} from "fp-ts/lib/ReaderTaskEither";
 import {tryCatch} from "fp-ts/lib/TaskEither";
 
 import {clientId, clientSecret} from "../config";
+import {arSlackTokens} from "../slack_bot_tokens";
 
 export type OAuthRedirectDependencies = {
     pool: Pool
@@ -14,7 +15,7 @@ export type OAuthRedirectDependencies = {
 
 export type OAuthRedirectError =
     | { _type: "RetrieveAuthTokenFromSlackError", message: string }
-    | { _type: "UpsertAuthTokenIntoPsqlError", message: string }
+    | { _type: "SaveBotTokenError", message: string }
     ;
 
 export const oauthRedirectHandler = (dependencies: OAuthRedirectDependencies) =>
@@ -22,7 +23,7 @@ export const oauthRedirectHandler = (dependencies: OAuthRedirectDependencies) =>
         console.log(`handling oauth redirect`);
 
         retrieveAuthTokenFromSlack(request.query.code?.toString() ?? "")
-            .chain((resp) => upsertAuthTokenIntoPsql(resp.access_token, resp.team.id))
+            .chain((resp) => upsertAuthTokenIntoPsql(resp.team.id, "", resp.bot_user_id, resp.access_token))
             .run(dependencies)
             .then(() => {
                 console.log(`saved access token`);
@@ -48,13 +49,14 @@ const retrieveAuthTokenFromSlack = (code: string) => new ReaderTaskEither<OAuthR
         (err: any) => ({_type: "RetrieveAuthTokenFromSlackError", message: err.toString()})
     ));
 
-const upsertAuthTokenIntoPsql = (accessToken: string, workspaceId: string) => new ReaderTaskEither<OAuthRedirectDependencies, OAuthRedirectError, void>(({pool}) => {
-    const query = `INSERT INTO slack_tokens(value, workspace_id) VALUES ($1, $2) ON CONFLICT (workspace_id) DO UPDATE SET value=EXCLUDED.value`;
-    const values = [accessToken, workspaceId];
-
-    return tryCatch<OAuthRedirectError, any>(
-        () => pool.query(query, values),
-        (err: any) => ({_type: "UpsertAuthTokenIntoPsqlError", message: err.toString()})
+const upsertAuthTokenIntoPsql = (workspaceId: string, botId: string, botUserId: string, accessToken: string) => new ReaderTaskEither<OAuthRedirectDependencies, OAuthRedirectError, void>((dependencies) => {
+    return tryCatch<OAuthRedirectError, void>(
+        () => arSlackTokens
+            .workspace(workspaceId)
+            .bot
+            .save(botId, botUserId, accessToken)
+            .run(dependencies),
+        (err: any) => ({_type: "SaveBotTokenError", message: err.toString()})
     )
         .map(() => ({}) as unknown as void);
 });

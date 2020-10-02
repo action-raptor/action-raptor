@@ -35,7 +35,7 @@ const remindInChannel = async (workspaceId: string, channelId: string, dependenc
         const blocks = await getActionItemsPublic(workspaceId, channelId, dependencies);
 
         await dependencies.client.chat.postMessage({
-            token: await arSlackTokens.workspace(workspaceId).bot.get.run(dependencies),
+            token: (await arSlackTokens.workspace(workspaceId).bot.get.run(dependencies)).value,
             channel: channelId,
             text: "Here are all open action items",
             blocks: blocks,
