@@ -3,8 +3,8 @@ import {Block} from "@slack/types";
 import {ChatPostMessageArguments} from "@slack/web-api";
 import {Reader} from "fp-ts/lib/Reader";
 import {AppDependencies} from "../app";
-import {OpenActionItem} from "../model.action_item";
-import {divider, markdownSection} from "../view";
+import {markdownSection} from "../view";
+import {getActionItemsPublic} from "../menu";
 
 export const postToChannelActionHandler: Reader<AppDependencies, Middleware<SlackActionMiddlewareArgs<BlockAction>>> =
     new Reader<AppDependencies, Middleware<SlackActionMiddlewareArgs<BlockAction>>>((dependencies: AppDependencies) =>
@@ -16,10 +16,9 @@ export const postToChannelActionHandler: Reader<AppDependencies, Middleware<Slac
             const userId = body.user.id;
 
             try {
-                const blocks = await getActionItemsPublic(workspaceId, channelId)(dependencies);
+                const blocks = await getActionItemsPublic(workspaceId, channelId, dependencies);
 
                 await client.chat.postMessage(<ChatPostMessageArguments>{
-                    username: userId,
                     channel: channelId,
                     blocks: blocks,
                 });
@@ -64,30 +63,3 @@ function buildErrorResponse(err: any, context: Context): Block[] {
         markdownSection(`something went wrong. please try again`),
     ];
 }
-
-const getActionItemsPublic = (workspaceId: string, channelId: string) =>
-    ({pool}: AppDependencies): Promise<Block[]> => {
-        const query = {
-            text: "SELECT * FROM action_items WHERE workspace_id = $1 AND channel_id = $2 AND status='OPEN'",
-            values: [workspaceId, channelId]
-        };
-
-        return pool.query(query)
-            .then(res => {
-                const actionItems: OpenActionItem[] = res.rows;
-
-                const itemBlocks = actionItems
-                    .map(actionItem =>
-                        actionItem.owner
-                            ? `${actionItem.description} - <@${actionItem.owner}>`
-                            : `${actionItem.description}`
-                    )
-                    .map(text => markdownSection(text));
-
-                return [
-                    markdownSection("Here are all open action items:"),
-                    divider(),
-                    ...itemBlocks
-                ];
-            });
-    };
