@@ -1,4 +1,4 @@
-import {Middleware, SlackViewMiddlewareArgs, ViewSubmitAction} from "@slack/bolt";
+import {Context, Middleware, SlackViewMiddlewareArgs, ViewSubmitAction} from "@slack/bolt";
 import {Block} from "@slack/types";
 import {Reader} from "fp-ts/lib/Reader";
 import {AppDependencies} from "../app";
@@ -7,7 +7,7 @@ import {markdownSection} from "../view";
 
 export const addActionItemActionHandler: Reader<AppDependencies, Middleware<SlackViewMiddlewareArgs<ViewSubmitAction>>> =
     new Reader<AppDependencies, Middleware<SlackViewMiddlewareArgs<ViewSubmitAction>>>((dependencies: AppDependencies) =>
-        async ({ack, body, client}) => {
+        async ({ack, body, context}) => {
             await ack();
 
             const metadata = JSON.parse(body.view.private_metadata ?? "{}");
@@ -24,16 +24,9 @@ export const addActionItemActionHandler: Reader<AppDependencies, Middleware<Slac
             try {
                 await saveNewActionItem(description, workspaceId, channelId, ownerId)(dependencies);
 
-                const blocks: Block[] = await getActionItemMenu(workspaceId, channelId, dependencies.pool)
-                    .catch((err: any) => {
-                        console.error(`error fetching items: ${err}`);
+                const blocks = await getActionItemMenu(workspaceId, channelId, dependencies);
 
-                        return [
-                            markdownSection(`something went wrong. please try again`),
-                        ];
-                    });
-
-                await updateMenu(responseUrl, blocks);
+                await updateMenu(responseUrl, blocks)(dependencies);
 
                 console.log(`added action item. ${JSON.stringify({
                     workspace_id: workspaceId,
@@ -45,6 +38,11 @@ export const addActionItemActionHandler: Reader<AppDependencies, Middleware<Slac
                     },
                 })}`);
             } catch (err) {
+                await updateMenu(
+                    responseUrl,
+                    buildErrorResponse(err, context),
+                );
+
                 console.log(`unexpected error while adding action item. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
@@ -82,4 +80,20 @@ function updateMenu(responseUrl: string, blocks: (Block)[]): (dependencies: AppD
         return dependencies.rp(options)
             .then(res => res);
     };
+}
+
+function buildErrorResponse(err: any, context: Context): Block[] {
+    if (err.data?.error === "not_in_channel") {
+        return [
+            markdownSection(`please add <@${context.botUserId}> to the channel`),
+        ];
+    }
+    if (err.data?.error === "channel_not_found") {
+        return [
+            markdownSection(`<@${context.botUserId}> cannot post in private channels`),
+        ];
+    }
+    return [
+        markdownSection(`something went wrong. please try again`),
+    ];
 }
