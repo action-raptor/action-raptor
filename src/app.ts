@@ -9,7 +9,6 @@ import {landingHandler, privacyHandler, supportHandler} from "./handlers/other.h
 
 import {actionCommandHandler} from "./handlers/slash_action.handler";
 import {appHomeOpenedHandler} from "./handlers/event.app_home_opened.handler";
-import {oauthRedirectHandler} from "./handlers/auth.handler";
 import {setupReminders} from "./reminders";
 import {addActionItemActionHandler} from "./handlers/action.add_action_item.handler";
 import {postToChannelActionHandler} from "./handlers/action.post_to_channel.handler";
@@ -19,7 +18,6 @@ import {arMenuActions} from "./model.menu_actions";
 import {openActionItemModalActionHandler} from "./handlers/action.open_action_item_modal.handler";
 import {clientId, clientSecret, signingSecret} from "./config";
 import {arSlackTokens} from "./slack_bot_tokens";
-import {addBotInfoToBotTokens} from "./data_migrations/add_bot_id_to_slack_tokens";
 
 export type AppDependencies = {
     pool: Pool
@@ -35,22 +33,23 @@ export async function buildApp(dependencies: AppDependencies) {
         scopes: ["channels:read", "chat:write", "commands", "team:read", "users:read", "users:read.email", "users:write",],
         installationStore: {
             storeInstallation: async (installation: Installation): Promise<void> => {
-                arSlackTokens.workspace(installation.team.id)
-                    .bot
+                arSlackTokens.workspace(installation.team.id).bot
                     .save(installation.bot?.id!, installation.bot?.userId!, installation.bot?.token!)
                     .run(dependencies)
             },
             fetchInstallation: async (query: InstallationQuery): Promise<Installation> =>
-                arSlackTokens.workspace(query.teamId)
-                    .bot
+                arSlackTokens.workspace(query.teamId).bot
                     .get
                     .run(dependencies)
                     .then(token => (<Installation>{
+                        user: {
+                            token: "",
+                        },
                         bot: {
                             id: token.bot_id,
                             userId: token.bot_user_id,
                             token: token.value
-                        }
+                        },
                     })),
         },
     });
@@ -76,17 +75,11 @@ export async function buildApp(dependencies: AppDependencies) {
 
     app.event<"app_home_opened">("app_home_opened", appHomeOpenedHandler.run(dependencies));
 
-    receiver.router.get("/auth/redirect", oauthRedirectHandler(dependencies));
-
     receiver.router.get("/", landingHandler);
     receiver.router.get("/privacy-policy", privacyHandler);
     receiver.router.get("/support", supportHandler);
 
     await setupReminders({
-        ...dependencies,
-        client: app.client,
-    });
-    await addBotInfoToBotTokens({
         ...dependencies,
         client: app.client,
     });
