@@ -66,7 +66,7 @@ You'll need a slack workspace that you have admin privileges in. Once you have t
   - oauth redirect URL
     - find the "Oauth and Permissions" page (left nav)
     - add a Redirect URL
-    - set the URL to `<your-ngrox-url>/auth/redirect`
+    - set the URL to `<your-ngrox-url>/slack/oauth_redirect`
     - while you're here, scroll down a bit and make sure your app has both the `chat:write` and `commands` scopes. Add them if they're missing
 - install app to workspace
   - in the "Basic Information" page (left nav), there should be a button to install/reinstall
