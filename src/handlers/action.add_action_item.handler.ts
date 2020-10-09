@@ -4,10 +4,11 @@ import {Reader} from "fp-ts/lib/Reader";
 import {AppDependencies} from "../app";
 import {getActionItemMenu} from "../menu";
 import {markdownSection} from "../view";
+import {fetchNotificationSettings} from "../notifications";
 
 export const addActionItemActionHandler: Reader<AppDependencies, Middleware<SlackViewMiddlewareArgs<ViewSubmitAction>>> =
     new Reader<AppDependencies, Middleware<SlackViewMiddlewareArgs<ViewSubmitAction>>>((dependencies: AppDependencies) =>
-        async ({ack, body, context}) => {
+        async ({ack, body, context, client}) => {
             await ack();
 
             const metadata = JSON.parse(body.view.private_metadata ?? "{}");
@@ -28,6 +29,18 @@ export const addActionItemActionHandler: Reader<AppDependencies, Middleware<Slac
 
                 await updateMenu(responseUrl, blocks)(dependencies);
 
+                const notificationSettings = await fetchNotificationSettings(workspaceId, channelId).run(dependencies);
+                if (notificationSettings.on_action_complete) {
+                    const text = ownerId
+                        ? `<@${body.user.id}> added "${description} - <@${ownerId}>`
+                        : `<@${body.user.id}> added "${description}"`;
+                    await client.chat.postMessage({
+                        channel: channelId,
+                        text: text,
+                        blocks: [markdownSection(text)],
+                    });
+                }
+
                 console.log(`added action item. ${JSON.stringify({
                     workspace_id: workspaceId,
                     channel_id: channelId,
@@ -36,6 +49,7 @@ export const addActionItemActionHandler: Reader<AppDependencies, Middleware<Slac
                         description: description,
                         owner_id: ownerId,
                     },
+                    notification_sent: notificationSettings.on_action_add,
                 })}`);
             } catch (err) {
                 await updateMenu(
