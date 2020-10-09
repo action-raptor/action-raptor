@@ -7,6 +7,7 @@ import {AppDependencies} from "../app";
 import {markdownSection} from "../view";
 import {ActionItem} from "../model.action_item";
 import {getActionItemMenu} from "../menu";
+import {fetchNotificationSettings} from "../notifications";
 
 export const completeActionItemActionHandler: Reader<AppDependencies, Middleware<SlackActionMiddlewareArgs<BlockAction>>> =
     new Reader<AppDependencies, Middleware<SlackActionMiddlewareArgs<BlockAction>>>((dependencies: AppDependencies) =>
@@ -21,7 +22,7 @@ export const completeActionItemActionHandler: Reader<AppDependencies, Middleware
             try {
                 const actionItem = await completeActionItem(actionItemId).run(dependencies);
 
-                const blocks = await getActionItemMenu(workspaceId, channelId, dependencies)
+                const blocks = await getActionItemMenu(workspaceId, channelId, dependencies);
 
                 await respond({
                     response_type: "ephemeral",
@@ -30,10 +31,13 @@ export const completeActionItemActionHandler: Reader<AppDependencies, Middleware
 
                 const notificationSettings = await fetchNotificationSettings(workspaceId, channelId).run(dependencies);
                 if (notificationSettings.on_action_complete) {
+                    const text = actionItem.owner
+                        ? `<@${body.user.id}> completed "${actionItem.description} - <@${actionItem.owner}>"`
+                        : `<@${body.user.id}> completed "${actionItem.description}"`;
                     await client.chat.postMessage({
                         channel: channelId,
-                        text: `<@${body.user.id}> completed "${actionItem.description}"`,
-                        blocks: [markdownSection(`<@${body.user.id}> completed "${actionItem.description}"`)],
+                        text: text,
+                        blocks: [markdownSection(text)],
                     });
                 }
 
@@ -42,6 +46,7 @@ export const completeActionItemActionHandler: Reader<AppDependencies, Middleware
                     channel_id: channelId,
                     user_id: userId,
                     action_item_id: actionItemId,
+                    notification_sent: notificationSettings.on_action_complete,
                 })}`);
             } catch (err) {
                 await respond({
@@ -74,23 +79,6 @@ function completeActionItem(actionItemId: string): Reader<AppDependencies, Promi
                 values: [actionItemId],
             });
             return result.rows[0];
-        }
-    );
-}
-
-type NotificationSettings = {
-    on_action_add: boolean
-    on_action_complete: boolean
-    on_action_cancel: boolean
-}
-
-function fetchNotificationSettings(workspaceId: string, channelId: string): Reader<AppDependencies, Promise<NotificationSettings>> {
-    return new Reader<AppDependencies, Promise<NotificationSettings>>(async () => {
-            return {
-                on_action_add: false,
-                on_action_complete: true,
-                on_action_cancel: false,
-            };
         }
     );
 }
