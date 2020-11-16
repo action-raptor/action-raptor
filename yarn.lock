@@ -820,10 +820,10 @@ forwarded@~0.1.2:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
 
-fp-ts@^1.19.5:
-  version "1.19.5"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.19.5.tgz#3da865e585dfa1fdfd51785417357ac50afc520a"
-  integrity sha512-wDNqTimnzs8QqpldiId9OavWK2NptormjXnRJTQecNjzwfyp6P/8s/zG8e4h3ja3oqkKaY72UlTjQYt/1yXf9A==
+fp-ts@^2.8.6:
+  version "2.8.6"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.8.6.tgz#1a0e6c3f29f5b0fbfa3120f034ea266aa73c811b"
+  integrity sha512-fGGpKf/Jy3UT4s16oM+hr/8F5QXFcZ+20NAvaZXH5Y5jsiLPMDCaNqffXq0z1Kr6ZUJj0346cH9tq+cI2SoJ4w==
 
 fresh@0.5.2:
   version "0.5.2"
