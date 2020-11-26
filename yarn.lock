@@ -23,15 +23,15 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@slack/bolt@^2.4.0":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-2.4.1.tgz#85e713aa9c31b4793e943606ab200627fa5eb20c"
-  integrity sha512-jscSZ/KfIPBRVyvQPorNcZuE4BHFgNe4jDyG8mD6rfltqmp2XjWdojSYSg5WNDTrhZ+rG5OM6Y5jzS2Mw8ONYA==
+"@slack/bolt@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-2.5.0.tgz#d6eb06d55b264990848aab47693fb4bcec2fed76"
+  integrity sha512-dOmUgU4Zw8ExNqFcCK2N9StQCfS/ByQULcA+A7VFRFK5eju548lrkCJy6zDGH6peKnUUO1W54c3TbJC0SObrww==
   dependencies:
     "@slack/logger" "^2.0.0"
-    "@slack/oauth" "^1.2.0"
+    "@slack/oauth" "^1.4.0"
     "@slack/types" "^1.9.0"
-    "@slack/web-api" "^5.12.0"
+    "@slack/web-api" "^5.14.0"
     "@types/express" "^4.16.1"
     "@types/node" ">=10"
     "@types/promise.allsettled" "^1.0.3"
@@ -49,10 +49,10 @@
   dependencies:
     "@types/node" ">=8.9.0"
 
-"@slack/oauth@^1.2.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@slack/oauth/-/oauth-1.3.0.tgz#7cb83602b478d211f086baafbddb3e20ecb6bb8d"
-  integrity sha512-SpoYUozTFMqTF/0vl1UraEmf1+PZueUCV3BKoy1HFzoFNNiDLtKPzsxsvGF59eHGasPJYB95CfcVSEGOwf+WyA==
+"@slack/oauth@^1.2.0", "@slack/oauth@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@slack/oauth/-/oauth-1.4.0.tgz#1dd3eab5a18d1e55106a8fe4c8ca72568ccd4639"
+  integrity sha512-wTREPfNfkFqTy7ql4V7bHYBZ62miLyqMvcvnJFQ1W6CTbGaha8BU1aTQaVHhKQuFgR5YztnN5d66bsxSImtBDA==
   dependencies:
     "@slack/logger" "^2.0.0"
     "@slack/web-api" "^5.7.0"
@@ -66,10 +66,10 @@
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-1.10.0.tgz#cbf7d83e1027f4cbfd13d6b429f120c7fb09127a"
   integrity sha512-tA7GG7Tj479vojfV3AoxbckalA48aK6giGjNtgH6ihpLwTyHE3fIgRrvt8TWfLwW8X8dyu7vgmAsGLRG7hWWOg==
 
-"@slack/web-api@^5.12.0", "@slack/web-api@^5.7.0":
-  version "5.13.0"
-  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-5.13.0.tgz#44b3c744f8f2c75b188a928c1dcb51024ac8d4d4"
-  integrity sha512-xT27bhYvkjidKCmGt3Dy4tx12Hk4oI9G/6vQFUdDXV1WSk50tysswHe67ckgcSU95yRPcnLVQicVpM3cAH6/AA==
+"@slack/web-api@^5.12.0", "@slack/web-api@^5.14.0", "@slack/web-api@^5.7.0":
+  version "5.14.0"
+  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-5.14.0.tgz#3c282670f4a5a1d0842b3e1787b46313a3da5d9d"
+  integrity sha512-Kvwb1Xnj4Wbe0aMkHNek3AGm+IINFuU0LzCIm5/sM2wN67SuituXF2OEkHNwM5OsRVXizNLIEPD2dADK82IXqw==
   dependencies:
     "@slack/logger" ">=1.0.0 <3.0.0"
     "@slack/types" "^1.7.0"
