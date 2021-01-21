@@ -32,11 +32,10 @@ export async function buildApp(dependencies: AppDependencies) {
         stateSecret: "action-raptor-state-secret",
         scopes: ["channels:read", "chat:write", "commands", "team:read", "users:read", "users:read.email", "users:write",],
         installationStore: {
-            storeInstallation: async (installation: Installation): Promise<void> => {
+            storeInstallation: async (installation: Installation): Promise<void> =>
                 arSlackTokens.workspace(installation.team.id).bot
                     .save(installation.bot?.id!, installation.bot?.userId!, installation.bot?.token!)
-                    .run(dependencies)
-            },
+                    .run(dependencies),
             fetchInstallation: async (query: InstallationQuery): Promise<Installation> =>
                 arSlackTokens.workspace(query.teamId).bot
                     .get
