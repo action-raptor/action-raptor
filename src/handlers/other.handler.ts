@@ -23,7 +23,7 @@ const landing = `
 `;
 
 const supportal = `
-for support please contact chance.a.cyphers@gmail.com
+for support please contact action.raptor@gmail.com
 `;
 
 const privacyPolicy = `<h1>Action Raptor Privacy Policy</h1>
@@ -46,6 +46,6 @@ We use your Personal Information only for providing and improving the app. By us
 <p>If we make any material changes to this Privacy Policy, we will notify you by placing a prominent notice on our website.
 </p>
 <h2>Contact Us</h2>
-<p>If you have any questions about this Privacy Policy, please contact us: chance.a.cyphers@gmail.com
+<p>If you have any questions about this Privacy Policy, please contact us: action.raptor@gmail.com
 </p>
 `;
