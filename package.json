@@ -30,7 +30,7 @@
     "moment": "^2.27.0",
     "node-pg-migrate": "^4.8.0",
     "node-schedule": "^1.3.2",
-    "pg": "^7.18.1",
+    "pg": "^8.6.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.6"
   },
