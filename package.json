@@ -15,7 +15,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@slack/bolt": "^2.4.0",
+    "@slack/bolt": "^3.4.1",
     "@slack/oauth": "^1.2.0",
     "@slack/types": "^1.8.0",
     "@slack/web-api": "^5.12.0",
